@@ -1,0 +1,303 @@
+<template>
+  <div v-if="pending" class="container mx-auto px-4 py-8">
+    <div class="animate-pulse space-y-6">
+      <div class="h-8 bg-muted rounded w-1/2"></div>
+      <div class="h-4 bg-muted rounded w-3/4"></div>
+      <div class="grid gap-4">
+        <div v-for="n in 3" :key="n" class="h-32 bg-muted rounded"></div>
+      </div>
+    </div>
+  </div>
+
+  <div v-else-if="error" class="container mx-auto px-4 py-8">
+    <div class="text-center py-16">
+      <h1 class="text-2xl font-bold mb-4">Company Not Found</h1>
+      <p class="text-muted-foreground mb-6">The company you're looking for doesn't exist.</p>
+      <NuxtLink to="/bounties">
+        <Button>Back to Bounties</Button>
+      </NuxtLink>
+    </div>
+  </div>
+
+  <div v-else-if="company" class="container mx-auto px-4 py-8">
+    <!-- Company Header -->
+    <div class="mb-8">
+      <div class="flex items-start justify-between mb-4">
+        <div>
+          <h1 class="text-3xl font-bold tracking-tight mb-2">{{ company.companyName }}</h1>
+          <p v-if="company.description" class="text-lg text-muted-foreground">
+            {{ company.description }}
+          </p>
+        </div>
+        
+        <div class="flex items-center gap-4">
+          <a 
+            v-if="company.website" 
+            :href="company.website" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            class="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+            </svg>
+            Visit Website
+          </a>
+        </div>
+      </div>
+      
+      <!-- Stats -->
+      <div class="flex items-center gap-6 text-sm text-muted-foreground">
+        <div class="flex items-center gap-1">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m8 6V9a2 2 0 00-2-2H10a2 2 0 00-2 2v3.1M15 13l-3-3-3 3"></path>
+          </svg>
+          {{ company.bounties.length }} total bounties
+        </div>
+        <div class="flex items-center gap-1">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          {{ openBounties.length }} open bounties
+        </div>
+        <div class="flex items-center gap-1">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+          </svg>
+          ${{ totalBountyValue.toLocaleString() }} total bounty value
+        </div>
+      </div>
+    </div>
+    
+    <!-- Filters -->
+    <div class="flex items-center justify-between mb-6">
+      <div class="flex items-center gap-4">
+        <Select v-model="statusFilter">
+          <SelectTrigger class="w-[140px]">
+            <SelectValue placeholder="All Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Status</SelectItem>
+            <SelectItem value="OPEN">Open</SelectItem>
+            <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
+            <SelectItem value="COMPLETED">Completed</SelectItem>
+            <SelectItem value="CANCELLED">Cancelled</SelectItem>
+          </SelectContent>
+        </Select>
+        
+        <Select v-model="sortBy">
+          <SelectTrigger class="w-[160px]">
+            <SelectValue placeholder="Sort by..." />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="newest">Newest First</SelectItem>
+            <SelectItem value="oldest">Oldest First</SelectItem>
+            <SelectItem value="payout-high">Highest Payout</SelectItem>
+            <SelectItem value="deadline">Deadline Soon</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      
+      <div class="text-sm text-muted-foreground">
+        {{ filteredBounties.length }} bounties
+      </div>
+    </div>
+    
+    <!-- Bounties List -->
+    <div v-if="filteredBounties.length" class="grid gap-6">
+      <div 
+        v-for="bounty in filteredBounties" 
+        :key="bounty.id"
+        class="border rounded-lg p-6 hover:shadow-md transition-shadow cursor-pointer"
+        @click="navigateTo(`/company/bounty/${bounty.id}`)"
+      >
+        <div class="flex items-start justify-between">
+          <div class="flex-1">
+            <div class="flex items-center gap-3 mb-2">
+              <h3 class="text-lg font-semibold text-foreground hover:text-primary transition-colors">
+                {{ bounty.title }}
+              </h3>
+              <Badge 
+                :variant="getBadgeVariant(bounty.status)"
+                class="text-xs"
+              >
+                {{ bounty.status }}
+              </Badge>
+            </div>
+            
+            <p class="text-sm text-muted-foreground mb-3 line-clamp-2">
+              {{ bounty.description }}
+            </p>
+            
+            <div class="flex items-center gap-4 text-xs text-muted-foreground">
+              <div v-if="bounty.deadline" class="flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                {{ formatDate(bounty.deadline) }}
+              </div>
+              
+              <div class="flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                </svg>
+                {{ bounty._count?.collaborations || 0 }} recruiters
+              </div>
+              
+              <div class="flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                {{ bounty._count?.submissions || 0 }} submissions
+              </div>
+              
+              <div class="text-xs text-muted-foreground">
+                Created {{ formatDate(bounty.createdAt) }}
+              </div>
+            </div>
+          </div>
+          
+          <div class="text-right">
+            <div class="text-lg font-bold text-foreground">
+              <template v-if="bounty.payoutType === 'CASH'">
+                ${{ bounty.payoutAmount?.toLocaleString() }}
+              </template>
+              <template v-else>
+                {{ bounty.payoutPercentage }}%
+              </template>
+            </div>
+            <div class="text-xs text-muted-foreground">
+              {{ bounty.payoutType === 'CASH' ? 'Cash' : 'Percentage' }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Empty State -->
+    <div v-else class="text-center py-16">
+      <div class="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+        <svg class="w-8 h-8 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m8 6V9a2 2 0 00-2-2H10a2 2 0 00-2 2v3.1M15 13l-3-3-3 3"></path>
+        </svg>
+      </div>
+      <h3 class="text-lg font-semibold mb-2">
+        {{ statusFilter === 'all' ? 'No bounties found' : `No ${statusFilter.toLowerCase()} bounties` }}
+      </h3>
+      <p class="text-muted-foreground mb-6">
+        {{ statusFilter === 'all' ? 'This company hasn\'t posted any bounties yet.' : `This company has no ${statusFilter.toLowerCase()} bounties at the moment.` }}
+      </p>
+      <div class="flex gap-4 justify-center">
+        <Button variant="outline" @click="statusFilter = 'all'">
+          Show All Bounties
+        </Button>
+        <NuxtLink to="/bounties">
+          <Button>Browse Other Bounties</Button>
+        </NuxtLink>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script lang="ts" setup>
+const route = useRoute()
+const companyId = route.params.id as string
+
+// Reactive filters
+const statusFilter = ref('all')
+const sortBy = ref('newest')
+
+// Fetch company data
+const { data: company, pending, error } = await useFetch(`/api/companies/${companyId}`, {
+  server: false
+})
+
+// Computed properties
+const openBounties = computed(() => 
+  company.value?.bounties.filter(b => b.status === 'OPEN') || []
+)
+
+const totalBountyValue = computed(() => {
+  if (!company.value?.bounties) return 0
+  return company.value.bounties
+    .filter(b => b.payoutType === 'CASH')
+    .reduce((sum, b) => sum + (b.payoutAmount || 0), 0)
+})
+
+const filteredBounties = computed(() => {
+  if (!company.value?.bounties) return []
+  
+  let filtered = [...company.value.bounties]
+  
+  // Filter by status
+  if (statusFilter.value !== 'all') {
+    filtered = filtered.filter(b => b.status === statusFilter.value)
+  }
+  
+  // Sort
+  switch (sortBy.value) {
+    case 'newest':
+      filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      break
+    case 'oldest':
+      filtered.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+      break
+    case 'payout-high':
+      filtered.sort((a, b) => {
+        const aValue = a.payoutType === 'CASH' ? (a.payoutAmount || 0) : (a.payoutPercentage || 0) * 100
+        const bValue = b.payoutType === 'CASH' ? (b.payoutAmount || 0) : (b.payoutPercentage || 0) * 100
+        return bValue - aValue
+      })
+      break
+    case 'deadline':
+      filtered.sort((a, b) => {
+        if (!a.deadline && !b.deadline) return 0
+        if (!a.deadline) return 1
+        if (!b.deadline) return -1
+        return new Date(a.deadline).getTime() - new Date(b.deadline).getTime()
+      })
+      break
+  }
+  
+  return filtered
+})
+
+// Helper functions
+const getBadgeVariant = (status: string) => {
+  switch (status) {
+    case 'OPEN': return 'default'
+    case 'IN_PROGRESS': return 'secondary'
+    case 'COMPLETED': return 'outline'
+    case 'CANCELLED': return 'destructive'
+    default: return 'secondary'
+  }
+}
+
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString)
+  const now = new Date()
+  const diffTime = date.getTime() - now.getTime()
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+  
+  if (diffDays < 0) {
+    return 'Expired'
+  } else if (diffDays === 0) {
+    return 'Today'
+  } else if (diffDays === 1) {
+    return 'Tomorrow'
+  } else if (diffDays < 7) {
+    return `${diffDays} days`
+  } else {
+    return date.toLocaleDateString()
+  }
+}
+</script>
+
+<style scoped>
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+</style>
