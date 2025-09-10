@@ -1,210 +1,261 @@
 <template>
-  <div class="container mx-auto px-4 py-8">
-    <div class="flex items-center justify-between mb-8">
-      <div>
-        <h1 class="text-3xl font-bold tracking-tight">Active Bounties</h1>
-        <p class="text-muted-foreground mt-2">
-          Browse and apply to open recruitment bounties
-        </p>
+  <div class="container mx-auto max-w-7xl space-y-6 p-4 md:p-6 lg:px-8">
+    <div class="relative h-full">
+      <div
+        class="flex flex-col md:flex-row md:items-center md:justify-between pb-2 gap-2">
+        <div class="flex flex-col space-y-1.5">
+          <h2 class="text-2xl font-semibold leading-none tracking-tight">
+            Bounties
+          </h2>
+          <p class="text-sm text-muted-foreground">Open bounties for you</p>
+        </div>
+
+        <div class="md:ml-auto flex items-center gap-2">
+          <Select v-model="sortBy">
+            <SelectTrigger class="w-[180px]">
+              <SelectValue placeholder="Sort by..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="newest">Newest First</SelectItem>
+              <SelectItem value="oldest">Oldest First</SelectItem>
+              <SelectItem value="payout-high">Highest Payout</SelectItem>
+              <SelectItem value="payout-low">Lowest Payout</SelectItem>
+              <SelectItem value="deadline">Deadline Soon</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
-      
-      <!-- Filters and Sort -->
-      <div class="flex items-center gap-4">
-        <Select v-model="sortBy">
-          <SelectTrigger class="w-[180px]">
-            <SelectValue placeholder="Sort by..." />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="newest">Newest First</SelectItem>
-            <SelectItem value="oldest">Oldest First</SelectItem>
-            <SelectItem value="payout-high">Highest Payout</SelectItem>
-            <SelectItem value="payout-low">Lowest Payout</SelectItem>
-            <SelectItem value="deadline">Deadline Soon</SelectItem>
-          </SelectContent>
-        </Select>
-        
-        <Button @click="refreshBounties" variant="outline" size="sm">
-          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+
+      <div
+        class="mb-4 flex sm:flex-wrap gap-2 whitespace-nowrap overflow-x-auto scrollbar-thin">
+        <div
+          v-for="tech in techFilters"
+          :key="tech.name"
+          @click="toggleTechFilter(tech.name)"
+          class="cursor-pointer">
+          <div
+            class="relative inline-flex px-2 py-1 rounded-md border-accent-foreground/20 bg-accent/10 text-accent-foreground transition-colors items-center font-medium text-xs hover:bg-accent/80 border"
+            :class="{
+              'bg-accent/80': selectedTechFilters.includes(tech.name),
+            }">
+            {{ tech.name }} ({{ tech.count }})
+          </div>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div v-if="pending" class="space-y-4">
+        <div v-for="n in 6" :key="n" class="animate-pulse">
+          <div class="bg-muted rounded-lg p-6">
+            <div class="h-4 bg-muted-foreground/20 rounded w-3/4 mb-3"></div>
+            <div class="h-3 bg-muted-foreground/20 rounded w-1/2 mb-2"></div>
+            <div class="h-3 bg-muted-foreground/20 rounded w-1/4"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bounties List -->
+      <div
+        v-else-if="filteredBounties?.length"
+        class="relative -mx-2 -mt-2 overflow-auto scrollbar-thin">
+        <ul class="divide-y divide-border">
+          <a
+            v-for="bounty in filteredBounties"
+            :key="bounty.id"
+            :href="`/company/bounty/${bounty.id}`"
+            class="block whitespace-nowrap hover:bg-muted/50">
+            <li class="flex items-center py-2 px-3">
+              <div class="flex-shrink-0 mr-3">
+                <div
+                  class="relative rounded-full shrink-0 overflow-hidden w-8 h-8">
+                  <img
+                    :src="`https://picsum.photos/20?random=${bounty.company.companyName}`"
+                    :alt="bounty.company.companyName"
+                    class="w-full h-full object-cover rounded-full" />
+                </div>
+              </div>
+
+              <div class="flex-grow min-w-0 mr-4">
+                <div class="flex items-center text-sm">
+                  <span class="font-semibold mr-1">
+                    {{ bounty.company.companyName }}
+                  </span>
+                  <span class="text-muted-foreground mr-2">
+                    #{{ bounty.id.slice(-4) }}
+                  </span>
+                  <span
+                    class="font-display whitespace-nowrap text-sm font-semibold tabular-nums text-success mr-2">
+                    <template v-if="bounty.payoutType === 'CASH'">
+                      ${{ bounty.payoutAmount?.toLocaleString() }}
+                    </template>
+                    <template v-else> {{ bounty.payoutPercentage }}% </template>
+                  </span>
+                  <span class="text-foreground">{{ bounty.title }}</span>
+                </div>
+              </div>
+            </li>
+          </a>
+        </ul>
+      </div>
+
+      <!-- Empty State -->
+      <div v-else class="text-center py-16">
+        <div
+          class="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg
+            class="w-8 h-8 text-muted-foreground"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
           </svg>
-          Refresh
-        </Button>
-      </div>
-    </div>
-    
-    <!-- Loading State -->
-    <div v-if="pending" class="space-y-4">
-      <div v-for="n in 6" :key="n" class="animate-pulse">
-        <div class="bg-muted rounded-lg p-6">
-          <div class="h-4 bg-muted-foreground/20 rounded w-3/4 mb-3"></div>
-          <div class="h-3 bg-muted-foreground/20 rounded w-1/2 mb-2"></div>
-          <div class="h-3 bg-muted-foreground/20 rounded w-1/4"></div>
         </div>
+        <h3 class="text-lg font-semibold mb-2">No bounties found</h3>
+        <p class="text-muted-foreground mb-6">
+          Be the first to post a bounty or check back later for new
+          opportunities.
+        </p>
+        <NuxtLink to="/create">
+          <Button>Post a Bounty</Button>
+        </NuxtLink>
       </div>
-    </div>
-    
-    <!-- Bounties Grid -->
-    <div v-else-if="bounties?.length" class="grid gap-6">
-      <div 
-        v-for="bounty in sortedBounties" 
-        :key="bounty.id"
-        class="border rounded-lg p-6 hover:shadow-md transition-shadow cursor-pointer"
-        @click="navigateTo(`/company/bounty/${bounty.id}`)"
-      >
-        <div class="flex items-start justify-between">
-          <div class="flex-1">
-            <div class="flex items-center gap-3 mb-2">
-              <h3 class="text-lg font-semibold text-foreground hover:text-primary transition-colors">
-                {{ bounty.title }}
-              </h3>
-              <Badge 
-                :variant="bounty.status === 'OPEN' ? 'default' : 'secondary'"
-                class="text-xs"
-              >
-                {{ bounty.status }}
-              </Badge>
-            </div>
-            
-            <p class="text-sm text-muted-foreground mb-3 line-clamp-2">
-              {{ bounty.description }}
-            </p>
-            
-            <div class="flex items-center gap-4 text-xs text-muted-foreground">
-              <div class="flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                </svg>
-                {{ bounty.company.companyName }}
-              </div>
-              
-              <div v-if="bounty.deadline" class="flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                {{ formatDate(bounty.deadline) }}
-              </div>
-              
-              <div class="flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                </svg>
-                {{ bounty._count?.collaborations || 0 }} recruiters working
-              </div>
-            </div>
-          </div>
-          
-          <div class="text-right">
-            <div class="text-lg font-bold text-foreground">
-              <template v-if="bounty.payoutType === 'CASH'">
-                ${{ bounty.payoutAmount?.toLocaleString() }}
-              </template>
-              <template v-else>
-                {{ bounty.payoutPercentage }}%
-              </template>
-            </div>
-            <div class="text-xs text-muted-foreground">
-              {{ bounty.payoutType === 'CASH' ? 'Cash' : 'Percentage' }}
-            </div>
-            <div class="text-xs text-muted-foreground mt-1">
-              {{ bounty.guaranteeTimeframe === 'ONE_MONTH' ? '1 month' : '2 months' }} guarantee
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Empty State -->
-    <div v-else class="text-center py-16">
-      <div class="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-        <svg class="w-8 h-8 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-        </svg>
-      </div>
-      <h3 class="text-lg font-semibold mb-2">No bounties found</h3>
-      <p class="text-muted-foreground mb-6">
-        Be the first to post a bounty or check back later for new opportunities.
-      </p>
-      <NuxtLink to="/create">
-        <Button>Post a Bounty</Button>
-      </NuxtLink>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-const sortBy = ref('newest')
+const sortBy = ref("newest");
+const selectedTechFilters = ref<string[]>([]);
 
 // Fetch bounties data
-const { data: bounties, pending, refresh: refreshBounties } = await useFetch('/api/bounties', {
+const {
+  data: bounties,
+  pending,
+  refresh: refreshBounties,
+} = await useFetch("/api/bounties", {
   server: false,
-  default: () => []
-})
+  default: () => [],
+});
 
-// Computed sorted bounties
-const sortedBounties = computed(() => {
-  if (!bounties.value) return []
-  
-  const sorted = [...bounties.value]
-  
-  switch (sortBy.value) {
-    case 'newest':
-      return sorted.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-    case 'oldest':
-      return sorted.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
-    case 'payout-high':
-      return sorted.sort((a, b) => {
-        const aValue = a.payoutType === 'CASH' ? (a.payoutAmount || 0) : (a.payoutPercentage || 0) * 100
-        const bValue = b.payoutType === 'CASH' ? (b.payoutAmount || 0) : (b.payoutPercentage || 0) * 100
-        return bValue - aValue
-      })
-    case 'payout-low':
-      return sorted.sort((a, b) => {
-        const aValue = a.payoutType === 'CASH' ? (a.payoutAmount || 0) : (a.payoutPercentage || 0) * 100
-        const bValue = b.payoutType === 'CASH' ? (b.payoutAmount || 0) : (b.payoutPercentage || 0) * 100
-        return aValue - bValue
-      })
-    case 'deadline':
-      return sorted.sort((a, b) => {
-        if (!a.deadline && !b.deadline) return 0
-        if (!a.deadline) return 1
-        if (!b.deadline) return -1
-        return new Date(a.deadline).getTime() - new Date(b.deadline).getTime()
-      })
-    default:
-      return sorted
-  }
-})
+// Extract technologies from requirements
+const techFilters = computed(() => {
+  if (!bounties.value) return [];
 
-// Format date helper
-const formatDate = (dateString: string) => {
-  const date = new Date(dateString)
-  const now = new Date()
-  const diffTime = date.getTime() - now.getTime()
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-  
-  if (diffDays < 0) {
-    return 'Expired'
-  } else if (diffDays === 0) {
-    return 'Today'
-  } else if (diffDays === 1) {
-    return 'Tomorrow'
-  } else if (diffDays < 7) {
-    return `${diffDays} days`
+  const techCount = new Map<string, number>();
+
+  bounties.value.forEach((bounty) => {
+    try {
+      const requirements = JSON.parse(bounty.requirements) || [];
+      requirements.forEach((tech: string) => {
+        techCount.set(tech, (techCount.get(tech) || 0) + 1);
+      });
+    } catch {
+      // Ignore JSON parse errors
+    }
+  });
+
+  return Array.from(techCount.entries())
+    .map(([name, count]) => ({ name, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 20); // Show top 20 technologies
+});
+
+// Toggle tech filter
+const toggleTechFilter = (tech: string) => {
+  const index = selectedTechFilters.value.indexOf(tech);
+  if (index > -1) {
+    selectedTechFilters.value.splice(index, 1);
   } else {
-    return date.toLocaleDateString()
+    selectedTechFilters.value.push(tech);
   }
-}
+};
 
-// Watch sort changes
-watch(sortBy, () => {
-  // Sorting is reactive via computed
-})
+// Computed filtered and sorted bounties
+const filteredBounties = computed(() => {
+  if (!bounties.value) return [];
+
+  let filtered = [...bounties.value];
+
+  // Apply tech filters
+  if (selectedTechFilters.value.length > 0) {
+    filtered = filtered.filter((bounty) => {
+      try {
+        const requirements = JSON.parse(bounty.requirements) || [];
+        return selectedTechFilters.value.some((tech) =>
+          requirements.includes(tech)
+        );
+      } catch {
+        return false;
+      }
+    });
+  }
+
+  // Apply sorting
+  switch (sortBy.value) {
+    case "newest":
+      return filtered.sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+    case "oldest":
+      return filtered.sort(
+        (a, b) =>
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      );
+    case "payout-high":
+      return filtered.sort((a, b) => {
+        const aValue =
+          a.payoutType === "CASH"
+            ? a.payoutAmount || 0
+            : (a.payoutPercentage || 0) * 100;
+        const bValue =
+          b.payoutType === "CASH"
+            ? b.payoutAmount || 0
+            : (b.payoutPercentage || 0) * 100;
+        return bValue - aValue;
+      });
+    case "payout-low":
+      return filtered.sort((a, b) => {
+        const aValue =
+          a.payoutType === "CASH"
+            ? a.payoutAmount || 0
+            : (a.payoutPercentage || 0) * 100;
+        const bValue =
+          b.payoutType === "CASH"
+            ? b.payoutAmount || 0
+            : (b.payoutPercentage || 0) * 100;
+        return aValue - bValue;
+      });
+    case "deadline":
+      return filtered.sort((a, b) => {
+        if (!a.deadline && !b.deadline) return 0;
+        if (!a.deadline) return 1;
+        if (!b.deadline) return -1;
+        return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
+      });
+    default:
+      return filtered;
+  }
+});
 </script>
 
 <style scoped>
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }

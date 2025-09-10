@@ -14,7 +14,7 @@
     <!-- Create Bounty Form -->
     <div v-else class="max-w-4xl mx-auto">
       <div class="mb-8">
-        <h1 class="text-3xl font-bold tracking-tight">Create Bounty</h1>
+        <h1 class="text-3xl font-bold">Create Bounty</h1>
         <p class="text-muted-foreground mt-2">
           Post a new recruitment bounty to find the perfect candidate
         </p>
@@ -47,6 +47,35 @@
                 placeholder="Describe the role, responsibilities, and what you're looking for in a candidate..."
                 rows="6"
                 required />
+            </div>
+
+            <div>
+              <Label for="picture">Bounty Picture (Optional)</Label>
+              <div class="">
+                <Input
+                  id="picture"
+                  type="file"
+                  accept="image/*"
+                  @change="handlePictureUpload"
+                  class="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/80" />
+                <p class="text-sm text-muted-foreground">
+                  Upload an image to represent your bounty (max 5MB)
+                </p>
+              </div>
+              <div v-if="form.picturePreview" class="mt-4">
+                <img
+                  :src="form.picturePreview"
+                  alt="Bounty picture preview"
+                  class="w-32 h-32 object-cover rounded-lg border" />
+                <Button
+                  @click="removePicture"
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  class="mt-2">
+                  Remove Picture
+                </Button>
+              </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -313,6 +342,8 @@ const form = ref({
   requirements: [""],
   interviewProcess: "",
   guidelines: "",
+  picture: null as File | null,
+  picturePreview: "" as string,
   // Company fields (only for new companies)
   companyName: "",
   companyDescription: "",
@@ -354,12 +385,54 @@ const removeRequirement = (index: number) => {
   }
 };
 
+const handlePictureUpload = (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  const file = target.files?.[0];
+
+  if (!file) return;
+
+  // Check file size (5MB limit)
+  if (file.size > 5 * 1024 * 1024) {
+    alert("File size must be less than 5MB");
+    target.value = "";
+    return;
+  }
+
+  // Check file type
+  if (!file.type.startsWith("image/")) {
+    alert("Please select an image file");
+    target.value = "";
+    return;
+  }
+
+  form.value.picture = file;
+
+  // Create preview URL
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    form.value.picturePreview = e.target?.result as string;
+  };
+  reader.readAsDataURL(file);
+};
+
+const removePicture = () => {
+  form.value.picture = null;
+  form.value.picturePreview = "";
+  // Clear the file input
+  const fileInput = document.getElementById("picture") as HTMLInputElement;
+  if (fileInput) fileInput.value = "";
+};
+
 const submitBounty = async () => {
   if (!isFormValid.value || isSubmitting.value) return;
 
   isSubmitting.value = true;
 
   try {
+    // Create FormData for file upload
+    const formData = new FormData();
+
+    // Add all the bounty data
     const bountyData = {
       title: form.value.title,
       description: form.value.description,
@@ -385,9 +458,17 @@ const submitBounty = async () => {
         : null,
     };
 
+    // Add JSON data to FormData
+    formData.append("data", JSON.stringify(bountyData));
+
+    // Add picture file if exists
+    if (form.value.picture) {
+      formData.append("picture", form.value.picture);
+    }
+
     const response = await $fetch("/api/bounties", {
       method: "POST",
-      body: bountyData,
+      body: formData,
     });
 
     // Redirect to the newly created bounty

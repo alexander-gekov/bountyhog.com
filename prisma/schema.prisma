@@ -152,6 +152,7 @@ model Bounty {
   guidelines          String?
   status              BountyStatus        @default(OPEN)
   formFields          Json?               // Dynamic form fields for submissions
+  picture             String?             // URL or path to bounty picture
   createdAt           DateTime            @default(now())
   updatedAt           DateTime            @updatedAt
   

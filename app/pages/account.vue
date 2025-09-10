@@ -184,7 +184,57 @@
             </CardHeader>
             <CardContent class="space-y-4">
               <div>
-                <p v-if="recruiter.bio" class="text-sm">{{ recruiter.bio }}</p>
+                <div class="flex items-start justify-between">
+                  <div class="flex-1">
+                    <div v-if="!isEditingBio">
+                      <p v-if="recruiter.bio" class="text-sm">
+                        {{ recruiter.bio }}
+                      </p>
+                      <p v-else class="text-sm text-muted-foreground italic">
+                        No bio added yet
+                      </p>
+                    </div>
+                    <div v-else class="space-y-3">
+                      <Textarea
+                        v-model="bioForm.bio"
+                        placeholder="Tell others about your recruiting experience, specialties, and background..."
+                        rows="4"
+                        class="resize-none" />
+                      <div class="flex items-center gap-2">
+                        <Button
+                          @click="saveBio"
+                          :disabled="isSavingBio"
+                          size="sm">
+                          {{ isSavingBio ? "Saving..." : "Save" }}
+                        </Button>
+                        <Button
+                          @click="cancelBioEdit"
+                          variant="outline"
+                          size="sm">
+                          Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                  <Button
+                    v-if="!isEditingBio"
+                    @click="startBioEdit"
+                    variant="ghost"
+                    size="sm"
+                    class="ml-2">
+                    <svg
+                      class="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24">
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                    </svg>
+                  </Button>
+                </div>
                 <div
                   v-if="recruiter.experience || recruiter.specialties"
                   class="mt-3 space-y-2">
@@ -398,6 +448,51 @@ const { data: activities } = await useFetch("/api/user/activities", {
   server: false,
   default: () => [],
 });
+
+// Bio editing state
+const isEditingBio = ref(false);
+const isSavingBio = ref(false);
+const bioForm = ref({
+  bio: "",
+});
+
+// Bio editing methods
+const startBioEdit = () => {
+  bioForm.value.bio = recruiter.value?.bio || "";
+  isEditingBio.value = true;
+};
+
+const cancelBioEdit = () => {
+  isEditingBio.value = false;
+  bioForm.value.bio = "";
+};
+
+const saveBio = async () => {
+  if (isSavingBio.value) return;
+
+  isSavingBio.value = true;
+
+  try {
+    await $fetch("/api/user/update-bio", {
+      method: "POST",
+      body: {
+        bio: bioForm.value.bio,
+      },
+    });
+
+    // Update the local data
+    if (recruiter.value) {
+      recruiter.value.bio = bioForm.value.bio;
+    }
+
+    isEditingBio.value = false;
+  } catch (error) {
+    console.error("Failed to update bio:", error);
+    // TODO: Show error message to user
+  } finally {
+    isSavingBio.value = false;
+  }
+};
 
 // Format date helper
 const formatDate = (date: string | Date) => {
