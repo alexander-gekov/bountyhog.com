@@ -425,27 +425,22 @@ const session = authClient.useSession();
 
 // Fetch additional data based on user type
 const { data: company } = await useFetch("/api/user/company", {
-  server: false,
   default: () => null,
 });
 
 const { data: recruiter } = await useFetch("/api/user/recruiter", {
-  server: false,
   default: () => null,
 });
 
 const { data: companyStats } = await useFetch("/api/user/company-stats", {
-  server: false,
   default: () => null,
 });
 
 const { data: recruiterStats } = await useFetch("/api/user/recruiter-stats", {
-  server: false,
   default: () => null,
 });
 
 const { data: activities } = await useFetch("/api/user/activities", {
-  server: false,
   default: () => [],
 });
 

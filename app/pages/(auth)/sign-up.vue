@@ -1,202 +1,154 @@
 <template>
-  <div class="min-h-screen flex">
+  <div class="min-h-screen w-full lg:grid lg:grid-cols-2">
+    <!-- Left side: Form -->
     <div
-      class="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 bg-white">
-      <div class="max-w-md w-full space-y-8">
-        <div class="text-center">
-          <h2 class="text-3xl font-bold text-gray-900">Create your account</h2>
-          <p class="mt-2 text-sm text-gray-600">
-            Join our platform to start posting bounties or finding opportunities
+      class="flex flex-col justify-between p-6 sm:p-10 bg-background text-foreground">
+      <NuxtLink to="/" class="text-2xl font-bold"> RecruityHub </NuxtLink>
+
+      <div class="mx-auto my-auto w-full max-w-sm space-y-6">
+        <div class="space-y-2 text-left">
+          <h1 class="text-3xl font-bold tracking-tight">Create your account</h1>
+          <p class="text-muted-foreground">
+            Join our platform to start posting bounties
           </p>
         </div>
 
-        <form @submit.prevent="handleSignUp" class="mt-8 space-y-6">
-          <div class="space-y-4">
-            <div>
-              <Label for="name" class="block text-sm font-medium text-gray-700">
-                Full Name
-              </Label>
-              <Input
-                id="name"
-                v-model="formData.name"
-                type="text"
-                required
-                class="mt-1"
-                placeholder="Enter your full name" />
-            </div>
+        <form @submit.prevent="handleSignUp" class="space-y-4">
+          <div>
+            <Label for="name">Full Name</Label>
+            <Input
+              id="name"
+              v-model="formData.name"
+              type="text"
+              required
+              placeholder="Jonny Burger" />
+          </div>
+          <div>
+            <Label for="email">Email</Label>
+            <Input
+              id="email"
+              v-model="formData.email"
+              type="email"
+              required
+              placeholder="you@example.com" />
+          </div>
 
-            <div>
-              <Label
-                for="email"
-                class="block text-sm font-medium text-gray-700">
-                Email Address
-              </Label>
-              <Input
-                id="email"
-                v-model="formData.email"
-                type="email"
-                required
-                class="mt-1"
-                placeholder="Enter your email address" />
-            </div>
+          <div>
+            <Label for="password">Password</Label>
+            <Input
+              id="password"
+              v-model="formData.password"
+              type="password"
+              required
+              placeholder="••••••••" />
+          </div>
 
-            <div>
-              <Label
-                for="password"
-                class="block text-sm font-medium text-gray-700">
-                Password
-              </Label>
-              <Input
-                id="password"
-                v-model="formData.password"
-                type="password"
-                required
-                class="mt-1"
-                placeholder="Create a secure password" />
-            </div>
-
-            <div>
-              <Label class="block text-sm font-medium text-gray-700 mb-3">
-                Account Type
-              </Label>
-              <div class="space-y-3">
-                <div
-                  class="flex items-start space-x-3 p-4 border rounded-lg cursor-pointer transition-colors"
-                  :class="
-                    formData.userType === 'COMPANY'
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-300 hover:bg-gray-50'
-                  "
-                  @click="formData.userType = 'COMPANY'">
-                  <input
-                    type="radio"
-                    id="company"
-                    v-model="formData.userType"
-                    value="COMPANY"
-                    class="mt-1" />
-                  <div class="flex-1">
-                    <Label
-                      for="company"
-                      class="font-medium text-gray-900 cursor-pointer">
-                      Company
-                    </Label>
-                    <p class="text-sm text-gray-600">
-                      Post bounties and hire talent for your projects
-                    </p>
-                  </div>
-                </div>
-
-                <div
-                  class="flex items-start space-x-3 p-4 border rounded-lg cursor-pointer transition-colors"
-                  :class="
-                    formData.userType === 'RECRUITER'
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-300 hover:bg-gray-50'
-                  "
-                  @click="formData.userType = 'RECRUITER'">
-                  <input
-                    type="radio"
-                    id="recruiter"
-                    v-model="formData.userType"
-                    value="RECRUITER"
-                    class="mt-1" />
-                  <div class="flex-1">
-                    <Label
-                      for="recruiter"
-                      class="font-medium text-gray-900 cursor-pointer">
-                      Recruiter
-                    </Label>
-                    <p class="text-sm text-gray-600">
-                      Post bounties and submit candidates to claim bounties
-                    </p>
-                  </div>
-                </div>
+          <div>
+            <Label>Account Type</Label>
+            <RadioGroup
+              v-model="formData.userType"
+              class="grid grid-cols-2 gap-4 !mt-1">
+              <div>
+                <RadioGroupItem
+                  id="company"
+                  value="COMPANY"
+                  class="peer sr-only" />
+                <Label
+                  for="company"
+                  class="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary">
+                  Company
+                </Label>
               </div>
-            </div>
+              <div>
+                <RadioGroupItem
+                  id="recruiter"
+                  value="RECRUITER"
+                  class="peer sr-only" />
+                <Label
+                  for="recruiter"
+                  class="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary">
+                  Recruiter
+                </Label>
+              </div>
+            </RadioGroup>
           </div>
 
-          <div class="pt-4">
-            <Button
-              type="submit"
-              :disabled="isLoading"
-              class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed">
-              <span v-if="!isLoading">Create Account</span>
-              <span v-else class="flex items-center">
-                <svg
-                  class="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24">
-                  <circle
-                    class="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    stroke-width="4"></circle>
-                  <path
-                    class="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Creating account...
-              </span>
-            </Button>
-          </div>
-
-          <div v-if="error" class="mt-4">
+          <div v-if="error" class="pt-2">
             <div
-              class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+              class="bg-red-50 border border-red-200 text-sm text-red-700 px-4 py-3 rounded">
               {{ error }}
             </div>
           </div>
 
-          <div class="text-center">
-            <p class="text-sm text-gray-600">
+          <Button
+            type="submit"
+            :disabled="isLoading"
+            class="w-full !mt-6"
+            size="lg">
+            <span v-if="!isLoading">Create Account</span>
+            <span v-else class="flex items-center">
+              <svg
+                class="animate-spin -ml-1 mr-3 h-5 w-5"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24">
+                <circle
+                  class="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  stroke-width="4"></circle>
+                <path
+                  class="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Creating account...
+            </span>
+          </Button>
+
+          <div class="text-center text-sm">
+            <p class="text-muted-foreground">
               Already have an account?
               <NuxtLink
                 to="/sign-in"
-                class="font-medium text-blue-600 hover:text-blue-500">
+                class="font-semibold text-primary underline-offset-4 hover:underline">
                 Sign in here
               </NuxtLink>
             </p>
           </div>
         </form>
       </div>
+
+      <p class="text-xs text-muted-foreground text-center">
+        By continuing, you agree to our
+        <a href="#" class="underline underline-offset-4">terms</a>
+        and
+        <a href="#" class="underline underline-offset-4">privacy policy</a>.
+      </p>
     </div>
 
-    <div
-      class="hidden lg:block flex-1 bg-gradient-to-br from-blue-600 to-purple-700">
-      <div class="h-full flex items-center justify-center px-8">
-        <div class="max-w-md text-center text-white">
-          <div class="mb-8">
-            <div
-              class="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-6">
-              <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" />
-              </svg>
-            </div>
-            <h3 class="text-2xl font-bold mb-4">Join RecruityHub</h3>
-            <p class="text-lg text-white/90 mb-6">
-              Connect companies with top talent through our bounty-based
-              recruitment platform
+    <!-- Right side: Testimonial -->
+    <div class="hidden lg:flex items-center justify-center bg-muted p-10">
+      <div class="w-full max-w-md text-left space-y-6">
+        <Quote class="w-16 h-16 text-foreground/20" :stroke-width="1.5" />
+        <p class="text-2xl font-medium text-foreground/80 leading-relaxed">
+          The ability to connect companies with a global network of recruiters
+          on a success-based model is a game-changer. RecruityHub streamlines
+          the entire process from posting a bounty to hiring the perfect
+          candidate.
+        </p>
+        <div class="flex items-center gap-4">
+          <Avatar>
+            <AvatarImage src="https://picsum.photos/id/23/200" alt="Jane Doe" />
+            <AvatarFallback>JD</AvatarFallback>
+          </Avatar>
+          <div>
+            <p class="font-semibold">Jane Doe</p>
+            <p class="text-sm text-muted-foreground">
+              Head of Talent, Innovate Inc.
             </p>
-          </div>
-
-          <div class="space-y-4 text-left">
-            <div class="flex items-center space-x-3">
-              <div class="w-2 h-2 bg-white rounded-full"></div>
-              <span>Post bounties for hard-to-fill positions</span>
-            </div>
-            <div class="flex items-center space-x-3">
-              <div class="w-2 h-2 bg-white rounded-full"></div>
-              <span>Access a network of skilled recruiters</span>
-            </div>
-            <div class="flex items-center space-x-3">
-              <div class="w-2 h-2 bg-white rounded-full"></div>
-              <span>Pay only for successful placements</span>
-            </div>
           </div>
         </div>
       </div>
@@ -206,6 +158,7 @@
 
 <script lang="ts" setup>
 import { authClient } from "@/lib/auth-client";
+import { Quote } from "lucide-vue-next";
 
 interface SignUpFormData {
   name: string;

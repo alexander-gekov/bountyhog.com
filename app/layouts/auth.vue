@@ -1,5 +1,11 @@
 <template>
-  <div class="min-h-screen bg-background">
+  <PatternBackground
+    class="min-h-screen"
+    :variant="PATTERN_BACKGROUND_VARIANT.Dot"
+    :animate="true"
+    :direction="PATTERN_BACKGROUND_DIRECTION.Bottom"
+    size="sm"
+    :mask="PATTERN_BACKGROUND_MASK.Ellipse">
     <!-- Navigation for authenticated users -->
     <header class="border-b">
       <div class="container mx-auto px-4 py-4">
@@ -68,10 +74,15 @@
     <main>
       <slot />
     </main>
-  </div>
+  </PatternBackground>
 </template>
 
 <script lang="ts" setup>
+import {
+  PATTERN_BACKGROUND_DIRECTION,
+  PATTERN_BACKGROUND_MASK,
+  PATTERN_BACKGROUND_VARIANT,
+} from "@/app/components/ui/pattern-background";
 import { LucideMoon, LucideSun } from "lucide-vue-next";
 import { authClient } from "@/lib/auth-client";
 

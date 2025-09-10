@@ -76,26 +76,27 @@
               </div>
 
               <div class="flex-grow min-w-0 mr-4">
-                <div class="flex items-center text-sm">
+                <div class="flex items-center gap-4 text-sm">
                   <span class="font-semibold mr-1">
                     {{ bounty.company.companyName }}
                   </span>
-                  <span class="text-muted-foreground mr-2">
-                    #{{ bounty.id.slice(-4) }}
-                  </span>
-                  <span
-                    class="font-display whitespace-nowrap text-sm font-semibold tabular-nums text-success mr-2">
+                  <Badge variant="default" size="md" class="mr-2">
                     <template v-if="bounty.payoutType === 'CASH'">
                       ${{ bounty.payoutAmount?.toLocaleString() }}
                     </template>
                     <template v-else> {{ bounty.payoutPercentage }}% </template>
-                  </span>
+                  </Badge>
                   <span class="text-foreground">{{ bounty.title }}</span>
                 </div>
               </div>
             </li>
           </a>
         </ul>
+
+        <!-- Load More Button -->
+        <div v-if="hasMoreItems" class="flex justify-center mt-6">
+          <Button @click="loadMore" variant="outline"> Load More </Button>
+        </div>
       </div>
 
       <!-- Empty State -->
@@ -130,6 +131,8 @@
 <script lang="ts" setup>
 const sortBy = ref("newest");
 const selectedTechFilters = ref<string[]>([]);
+const currentPage = ref(1);
+const itemsPerPage = 25;
 
 // Fetch bounties data
 const {
@@ -174,8 +177,8 @@ const toggleTechFilter = (tech: string) => {
   }
 };
 
-// Computed filtered and sorted bounties
-const filteredBounties = computed(() => {
+// Computed filtered and sorted bounties (all results)
+const allFilteredBounties = computed(() => {
   if (!bounties.value) return [];
 
   let filtered = [...bounties.value];
@@ -240,6 +243,27 @@ const filteredBounties = computed(() => {
     default:
       return filtered;
   }
+});
+
+// Paginated bounties (visible results)
+const filteredBounties = computed(() => {
+  const endIndex = currentPage.value * itemsPerPage;
+  return allFilteredBounties.value.slice(0, endIndex);
+});
+
+// Check if there are more items to load
+const hasMoreItems = computed(() => {
+  return allFilteredBounties.value.length > currentPage.value * itemsPerPage;
+});
+
+// Load more function
+const loadMore = () => {
+  currentPage.value += 1;
+};
+
+// Reset pagination when filters change
+watch([sortBy, selectedTechFilters], () => {
+  currentPage.value = 1;
 });
 </script>
 
