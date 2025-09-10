@@ -235,7 +235,6 @@ const handleSignUp = async () => {
       name: formData.value.name,
       email: formData.value.email,
       password: formData.value.password,
-      userType: formData.value.userType,
       callbackURL: window.location.origin,
     });
 
@@ -244,7 +243,21 @@ const handleSignUp = async () => {
       return;
     }
 
-    await navigateTo("/");
+    if (data?.user) {
+      try {
+        await $fetch("/api/user/update-type", {
+          method: "POST",
+          body: {
+            userId: data.user.id,
+            userType: formData.value.userType,
+          },
+        });
+      } catch (updateError) {
+        console.warn("Failed to update user type:", updateError);
+      }
+
+      await navigateTo("/");
+    }
   } catch (err) {
     console.error("Sign up error:", err);
     error.value = "An unexpected error occurred. Please try again.";

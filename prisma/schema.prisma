@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -171,6 +171,7 @@ model RecruiterCollaboration {
   recruiter   Recruiter @relation(fields: [recruiterId], references: [id], onDelete: Cascade)
   isUnlocked  Boolean  @default(false) // Company unlocks submission access
   message     String?  // Initial interest message
+  submissions Submission[] // Submissions made through this collaboration
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   
@@ -193,20 +194,22 @@ model BountyNote {
 }
 
 model Submission {
-  id          String           @id @default(cuid())
-  bountyId    String
-  bounty      Bounty           @relation(fields: [bountyId], references: [id], onDelete: Cascade)
-  recruiterId String
-  recruiter   Recruiter        @relation(fields: [recruiterId], references: [id], onDelete: Cascade)
+  id            String           @id @default(cuid())
+  bountyId      String
+  bounty        Bounty           @relation(fields: [bountyId], references: [id], onDelete: Cascade)
+  recruiterId   String
+  recruiter     Recruiter        @relation(fields: [recruiterId], references: [id], onDelete: Cascade)
+  collaborationId String?
+  collaboration RecruiterCollaboration? @relation(fields: [collaborationId], references: [id], onDelete: SetNull)
   candidateName String
   candidateEmail String?
-  formData    Json             // Submitted form data
-  files       SubmissionFile[]
-  status      SubmissionStatus @default(PENDING)
-  feedback    String?
-  isHired     Boolean          @default(false)
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  formData      Json             // Submitted form data
+  files         SubmissionFile[]
+  status        SubmissionStatus @default(PENDING)
+  feedback      String?
+  isHired       Boolean          @default(false)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
   
   @@map("submission")
 }

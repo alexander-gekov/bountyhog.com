@@ -9,34 +9,30 @@
               RecruityHub
             </NuxtLink>
             <div class="flex items-center space-x-6">
-              <NuxtLink 
-                to="/bounties" 
-                class="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-              >
+              <NuxtLink
+                to="/bounties"
+                class="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
                 Bounties
               </NuxtLink>
-              <NuxtLink 
-                v-if="user && user.userType === 'RECRUITER'"
-                to="/my-bounties" 
-                class="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-              >
+              <NuxtLink
+                v-if="session.data?.user.userType === 'RECRUITER'"
+                to="/my-bounties"
+                class="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
                 My Bounties
               </NuxtLink>
-              <NuxtLink 
-                to="/create" 
-                class="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-              >
+              <NuxtLink
+                to="/create"
+                class="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
                 Create
               </NuxtLink>
             </div>
           </div>
-          
+
           <div class="flex items-center space-x-4">
-            <template v-if="user">
-              <NuxtLink 
-                to="/account" 
-                class="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-              >
+            <template v-if="session.data">
+              <NuxtLink
+                to="/account"
+                class="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
                 Account
               </NuxtLink>
               <Button @click="signOut" variant="outline" size="sm">
@@ -45,21 +41,17 @@
             </template>
             <template v-else>
               <NuxtLink to="/sign-in">
-                <Button variant="outline" size="sm">
-                  Sign In
-                </Button>
+                <Button variant="outline" size="sm"> Sign In </Button>
               </NuxtLink>
               <NuxtLink to="/sign-up">
-                <Button size="sm">
-                  Sign Up
-                </Button>
+                <Button size="sm"> Sign Up </Button>
               </NuxtLink>
             </template>
           </div>
         </nav>
       </div>
     </header>
-    
+
     <!-- Main Content -->
     <main>
       <slot />
@@ -68,12 +60,13 @@
 </template>
 
 <script lang="ts" setup>
-import { authClient } from '@/lib/auth-client'
+import { authClient } from "@/lib/auth-client";
 
-const { data: user } = await authClient.useSession()
+// Get session data using Better Auth
+const session = authClient.useSession();
 
 const signOut = async () => {
-  await authClient.signOut()
-  await navigateTo('/sign-in')
-}
+  await authClient.signOut();
+  await navigateTo("/sign-in");
+};
 </script>

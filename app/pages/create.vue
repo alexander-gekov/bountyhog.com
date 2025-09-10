@@ -1,9 +1,11 @@
 <template>
   <div class="container mx-auto px-4 py-8">
     <!-- Auth Check -->
-    <div v-if="!user" class="text-center py-16">
+    <div v-if="!session.data" class="text-center py-16">
       <h1 class="text-2xl font-bold mb-4">Authentication Required</h1>
-      <p class="text-muted-foreground mb-6">You need to sign in to create a bounty.</p>
+      <p class="text-muted-foreground mb-6">
+        You need to sign in to create a bounty.
+      </p>
       <NuxtLink to="/sign-in">
         <Button>Sign In</Button>
       </NuxtLink>
@@ -30,36 +32,33 @@
           <CardContent class="space-y-6">
             <div>
               <Label for="title">Job Title *</Label>
-              <Input 
+              <Input
                 id="title"
-                v-model="form.title" 
+                v-model="form.title"
                 placeholder="Senior Full Stack Developer"
-                required
-              />
+                required />
             </div>
-            
+
             <div>
               <Label for="description">Job Description *</Label>
-              <Textarea 
+              <Textarea
                 id="description"
-                v-model="form.description" 
+                v-model="form.description"
                 placeholder="Describe the role, responsibilities, and what you're looking for in a candidate..."
                 rows="6"
-                required
-              />
+                required />
             </div>
-            
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <Label for="deadline">Application Deadline</Label>
-                <Input 
+                <Input
                   id="deadline"
-                  v-model="form.deadline" 
+                  v-model="form.deadline"
                   type="date"
-                  :min="minDate"
-                />
+                  :min="minDate" />
               </div>
-              
+
               <div>
                 <Label for="guaranteeTimeframe">Guarantee Timeframe *</Label>
                 <Select v-model="form.guaranteeTimeframe" required>
@@ -89,60 +88,67 @@
               <Label>Payout Type *</Label>
               <div class="flex items-center space-x-6 mt-2">
                 <div class="flex items-center space-x-2">
-                  <input 
+                  <input
                     id="cash"
-                    v-model="form.payoutType" 
-                    type="radio" 
+                    v-model="form.payoutType"
+                    type="radio"
                     value="CASH"
-                    class="w-4 h-4 text-primary"
-                  />
-                  <Label for="cash" class="text-sm font-normal">Fixed Cash Amount</Label>
+                    class="w-4 h-4 text-primary" />
+                  <Label for="cash" class="text-sm font-normal"
+                    >Fixed Cash Amount</Label
+                  >
                 </div>
                 <div class="flex items-center space-x-2">
-                  <input 
+                  <input
                     id="percentage"
-                    v-model="form.payoutType" 
-                    type="radio" 
+                    v-model="form.payoutType"
+                    type="radio"
                     value="PERCENTAGE"
-                    class="w-4 h-4 text-primary"
-                  />
-                  <Label for="percentage" class="text-sm font-normal">Percentage of Salary</Label>
+                    class="w-4 h-4 text-primary" />
+                  <Label for="percentage" class="text-sm font-normal"
+                    >Percentage of Salary</Label
+                  >
                 </div>
               </div>
             </div>
-            
+
             <div v-if="form.payoutType === 'CASH'">
               <Label for="payoutAmount">Cash Amount (USD) *</Label>
               <div class="relative">
-                <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">$</span>
-                <Input 
+                <span
+                  class="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground"
+                  >$</span
+                >
+                <Input
                   id="payoutAmount"
-                  v-model.number="form.payoutAmount" 
+                  v-model:number="form.payoutAmount"
                   type="number"
                   min="100"
                   step="100"
                   placeholder="5000"
                   class="pl-8"
-                  required
-                />
+                  required />
               </div>
             </div>
-            
+
             <div v-if="form.payoutType === 'PERCENTAGE'">
-              <Label for="payoutPercentage">Percentage of Annual Salary *</Label>
+              <Label for="payoutPercentage"
+                >Percentage of Annual Salary *</Label
+              >
               <div class="relative">
-                <Input 
+                <Input
                   id="payoutPercentage"
-                  v-model.number="form.payoutPercentage" 
-                  type="number"
+                  v-model:number="form.payoutPercentage"
                   min="5"
                   max="50"
                   step="0.5"
                   placeholder="15"
                   class="pr-8"
-                  required
-                />
-                <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">%</span>
+                  required />
+                <span
+                  class="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground"
+                  >%</span
+                >
               </div>
             </div>
           </CardContent>
@@ -157,31 +163,39 @@
             </CardDescription>
           </CardHeader>
           <CardContent class="space-y-4">
-            <div v-for="(requirement, index) in form.requirements" :key="index" class="flex items-center gap-2">
-              <Input 
-                v-model="form.requirements[index]" 
+            <div
+              v-for="(requirement, index) in form.requirements"
+              :key="index"
+              class="flex items-center gap-2">
+              <Input
+                v-model="form.requirements[index]"
                 placeholder="e.g., 5+ years of React experience"
-                class="flex-1"
-              />
-              <Button 
+                class="flex-1" />
+              <Button
                 @click="removeRequirement(index)"
                 type="button"
                 variant="outline"
                 size="sm"
-                :disabled="form.requirements.length <= 1"
-              >
+                :disabled="form.requirements.length <= 1">
                 Remove
               </Button>
             </div>
-            
-            <Button 
+
+            <Button
               @click="addRequirement"
               type="button"
               variant="outline"
-              size="sm"
-            >
-              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+              size="sm">
+              <svg
+                class="w-4 h-4 mr-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 4v16m8-8H4"></path>
               </svg>
               Add Requirement
             </Button>
@@ -193,28 +207,27 @@
           <CardHeader>
             <CardTitle>Process & Guidelines</CardTitle>
             <CardDescription>
-              Provide additional context about the hiring process and expectations
+              Provide additional context about the hiring process and
+              expectations
             </CardDescription>
           </CardHeader>
           <CardContent class="space-y-6">
             <div>
               <Label for="interviewProcess">Interview Process</Label>
-              <Textarea 
+              <Textarea
                 id="interviewProcess"
-                v-model="form.interviewProcess" 
+                v-model="form.interviewProcess"
                 placeholder="Describe your interview process (e.g., 3 rounds: Technical screening, System design, Cultural fit)"
-                rows="3"
-              />
+                rows="3" />
             </div>
-            
+
             <div>
               <Label for="guidelines">Guidelines for Recruiters</Label>
-              <Textarea 
+              <Textarea
                 id="guidelines"
-                v-model="form.guidelines" 
+                v-model="form.guidelines"
                 placeholder="Any specific guidelines, preferences, or instructions for recruiters working on this bounty"
-                rows="3"
-              />
+                rows="3" />
             </div>
           </CardContent>
         </Card>
@@ -224,38 +237,36 @@
           <CardHeader>
             <CardTitle>Company Information</CardTitle>
             <CardDescription>
-              Since this is your first bounty, please provide your company details
+              Since this is your first bounty, please provide your company
+              details
             </CardDescription>
           </CardHeader>
           <CardContent class="space-y-6">
             <div>
               <Label for="companyName">Company Name *</Label>
-              <Input 
+              <Input
                 id="companyName"
-                v-model="form.companyName" 
+                v-model="form.companyName"
                 placeholder="Your Company Name"
-                required
-              />
+                required />
             </div>
-            
+
             <div>
               <Label for="companyDescription">Company Description</Label>
-              <Textarea 
+              <Textarea
                 id="companyDescription"
-                v-model="form.companyDescription" 
+                v-model="form.companyDescription"
                 placeholder="Brief description of your company and what you do"
-                rows="3"
-              />
+                rows="3" />
             </div>
-            
+
             <div>
               <Label for="companyWebsite">Company Website</Label>
-              <Input 
+              <Input
                 id="companyWebsite"
-                v-model="form.companyWebsite" 
+                v-model="form.companyWebsite"
                 type="url"
-                placeholder="https://yourcompany.com"
-              />
+                placeholder="https://yourcompany.com" />
             </div>
           </CardContent>
         </Card>
@@ -263,16 +274,13 @@
         <!-- Submit -->
         <div class="flex items-center justify-end gap-4 pt-6">
           <NuxtLink to="/bounties">
-            <Button type="button" variant="outline">
-              Cancel
-            </Button>
+            <Button type="button" variant="outline"> Cancel </Button>
           </NuxtLink>
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             :disabled="isSubmitting || !isFormValid"
-            class="min-w-[120px]"
-          >
-            {{ isSubmitting ? 'Creating...' : 'Create Bounty' }}
+            class="min-w-[120px]">
+            {{ isSubmitting ? "Creating..." : "Create Bounty" }}
           </Button>
         </div>
       </form>
@@ -281,73 +289,75 @@
 </template>
 
 <script lang="ts" setup>
-import { authClient } from '@/lib/auth-client'
+import { authClient } from "@/lib/auth-client";
 
 // Auth check
-const { data: user } = await authClient.useSession()
+const session = authClient.useSession();
 
 // Fetch user's company if they have one
-const { data: userCompany } = await useFetch('/api/user/company', {
+const { data: userCompany } = await useFetch("/api/user/company", {
   server: false,
-  default: () => null
-})
+  default: () => null,
+});
 
 // Form state
-const isSubmitting = ref(false)
+const isSubmitting = ref(false);
 const form = ref({
-  title: '',
-  description: '',
-  deadline: '',
-  guaranteeTimeframe: '',
-  payoutType: 'CASH',
+  title: "",
+  description: "",
+  deadline: "",
+  guaranteeTimeframe: "",
+  payoutType: "CASH",
   payoutAmount: null as number | null,
   payoutPercentage: null as number | null,
-  requirements: [''],
-  interviewProcess: '',
-  guidelines: '',
+  requirements: [""],
+  interviewProcess: "",
+  guidelines: "",
   // Company fields (only for new companies)
-  companyName: '',
-  companyDescription: '',
-  companyWebsite: ''
-})
+  companyName: "",
+  companyDescription: "",
+  companyWebsite: "",
+});
 
 // Computed
 const minDate = computed(() => {
-  const tomorrow = new Date()
-  tomorrow.setDate(tomorrow.getDate() + 1)
-  return tomorrow.toISOString().split('T')[0]
-})
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  return tomorrow.toISOString().split("T")[0];
+});
 
 const isFormValid = computed(() => {
-  const basicValid = form.value.title && 
-                    form.value.description && 
-                    form.value.guaranteeTimeframe &&
-                    form.value.payoutType
+  const basicValid =
+    form.value.title &&
+    form.value.description &&
+    form.value.guaranteeTimeframe &&
+    form.value.payoutType;
 
-  const payoutValid = form.value.payoutType === 'CASH' 
-    ? form.value.payoutAmount && form.value.payoutAmount > 0
-    : form.value.payoutPercentage && form.value.payoutPercentage > 0
+  const payoutValid =
+    form.value.payoutType === "CASH"
+      ? form.value.payoutAmount && form.value.payoutAmount > 0
+      : form.value.payoutPercentage && form.value.payoutPercentage > 0;
 
-  const companyValid = userCompany.value || form.value.companyName
+  const companyValid = userCompany.value || form.value.companyName;
 
-  return basicValid && payoutValid && companyValid
-})
+  return basicValid && payoutValid && companyValid;
+});
 
 // Methods
 const addRequirement = () => {
-  form.value.requirements.push('')
-}
+  form.value.requirements.push("");
+};
 
 const removeRequirement = (index: number) => {
   if (form.value.requirements.length > 1) {
-    form.value.requirements.splice(index, 1)
+    form.value.requirements.splice(index, 1);
   }
-}
+};
 
 const submitBounty = async () => {
-  if (!isFormValid.value || isSubmitting.value) return
+  if (!isFormValid.value || isSubmitting.value) return;
 
-  isSubmitting.value = true
+  isSubmitting.value = true;
 
   try {
     const bountyData = {
@@ -356,36 +366,37 @@ const submitBounty = async () => {
       deadline: form.value.deadline || null,
       guaranteeTimeframe: form.value.guaranteeTimeframe,
       payoutType: form.value.payoutType,
-      payoutAmount: form.value.payoutType === 'CASH' ? form.value.payoutAmount : null,
-      payoutPercentage: form.value.payoutType === 'PERCENTAGE' ? form.value.payoutPercentage : null,
-      requirements: form.value.requirements.filter(req => req.trim()),
+      payoutAmount:
+        form.value.payoutType === "CASH" ? form.value.payoutAmount : null,
+      payoutPercentage:
+        form.value.payoutType === "PERCENTAGE"
+          ? form.value.payoutPercentage
+          : null,
+      requirements: form.value.requirements.filter((req) => req.trim()),
       interviewProcess: form.value.interviewProcess || null,
       guidelines: form.value.guidelines || null,
       // Company data (only if creating new company)
-      company: !userCompany.value ? {
-        companyName: form.value.companyName,
-        description: form.value.companyDescription || null,
-        website: form.value.companyWebsite || null
-      } : null
-    }
+      company: !userCompany.value
+        ? {
+            companyName: form.value.companyName,
+            description: form.value.companyDescription || null,
+            website: form.value.companyWebsite || null,
+          }
+        : null,
+    };
 
-    const response = await $fetch('/api/bounties', {
-      method: 'POST',
-      body: bountyData
-    })
+    const response = await $fetch("/api/bounties", {
+      method: "POST",
+      body: bountyData,
+    });
 
     // Redirect to the newly created bounty
-    await navigateTo(`/company/bounty/${response.id}`)
+    await navigateTo(`/company/bounty/${response.id}`);
   } catch (error) {
-    console.error('Failed to create bounty:', error)
+    console.error("Failed to create bounty:", error);
     // TODO: Show error message to user
   } finally {
-    isSubmitting.value = false
+    isSubmitting.value = false;
   }
-}
-
-// Redirect if not authenticated
-if (process.client && !user.value) {
-  await navigateTo('/sign-in')
-}
+};
 </script>
