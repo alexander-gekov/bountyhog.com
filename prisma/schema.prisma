@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -26,6 +26,10 @@ model User {
   updatedAt     DateTime  @default(now()) @updatedAt
   sessions      Session[]
   accounts      Account[]
+  
+  company       Company?
+  recruiter     Recruiter?
+  bountyNotes   BountyNote[]
 
   @@unique([email])
   @@map("user")
@@ -74,4 +78,165 @@ model Verification {
   updatedAt  DateTime @default(now()) @updatedAt
 
   @@map("verification")
+}
+
+enum PayoutType {
+  CASH
+  PERCENTAGE
+}
+
+enum BountyStatus {
+  OPEN
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum SubmissionStatus {
+  PENDING
+  REVIEWED
+  ACCEPTED
+  REJECTED
+}
+
+enum GuaranteeTimeframe {
+  ONE_MONTH
+  TWO_MONTHS
+}
+
+model Company {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyName String
+  description String?
+  website     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  bounties    Bounty[]
+  
+  @@map("company")
+}
+
+model Recruiter {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bio         String?
+  experience  String?
+  specialties String?  // Comma-separated values for SQLite
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  collaborations RecruiterCollaboration[]
+  submissions    Submission[]
+  payouts        Payout[]
+  
+  @@map("recruiter")
+}
+
+model Bounty {
+  id                  String              @id @default(cuid())
+  title               String
+  description         String
+  companyId           String
+  company             Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  payoutType          PayoutType
+  payoutAmount        Float?              // For cash payouts
+  payoutPercentage    Float?              // For percentage payouts
+  guaranteeTimeframe  GuaranteeTimeframe
+  deadline            DateTime?
+  requirements        String              // JSON string of hard requirements
+  interviewProcess    String?
+  guidelines          String?
+  status              BountyStatus        @default(OPEN)
+  formFields          Json?               // Dynamic form fields for submissions
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  
+  collaborations      RecruiterCollaboration[]
+  submissions         Submission[]
+  notes               BountyNote[]
+  payouts             Payout[]
+  
+  @@map("bounty")
+}
+
+model RecruiterCollaboration {
+  id          String   @id @default(cuid())
+  bountyId    String
+  bounty      Bounty   @relation(fields: [bountyId], references: [id], onDelete: Cascade)
+  recruiterId String
+  recruiter   Recruiter @relation(fields: [recruiterId], references: [id], onDelete: Cascade)
+  isUnlocked  Boolean  @default(false) // Company unlocks submission access
+  message     String?  // Initial interest message
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@unique([bountyId, recruiterId])
+  @@map("recruiter_collaboration")
+}
+
+model BountyNote {
+  id        String   @id @default(cuid())
+  bountyId  String
+  bounty    Bounty   @relation(fields: [bountyId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  content   String
+  isPublic  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("bounty_note")
+}
+
+model Submission {
+  id          String           @id @default(cuid())
+  bountyId    String
+  bounty      Bounty           @relation(fields: [bountyId], references: [id], onDelete: Cascade)
+  recruiterId String
+  recruiter   Recruiter        @relation(fields: [recruiterId], references: [id], onDelete: Cascade)
+  candidateName String
+  candidateEmail String?
+  formData    Json             // Submitted form data
+  files       SubmissionFile[]
+  status      SubmissionStatus @default(PENDING)
+  feedback    String?
+  isHired     Boolean          @default(false)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  
+  @@map("submission")
+}
+
+model SubmissionFile {
+  id           String     @id @default(cuid())
+  submissionId String
+  submission   Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  fileName     String
+  fileSize     Int
+  fileType     String
+  filePath     String     // Storage path
+  uploadedAt   DateTime   @default(now())
+  
+  @@map("submission_file")
+}
+
+model Payout {
+  id          String    @id @default(cuid())
+  bountyId    String
+  bounty      Bounty    @relation(fields: [bountyId], references: [id], onDelete: Cascade)
+  recruiterId String
+  recruiter   Recruiter @relation(fields: [recruiterId], references: [id], onDelete: Cascade)
+  amount      Float
+  currency    String    @default("USD")
+  isPaid      Boolean   @default(false)
+  paidAt      DateTime?
+  dueDate     DateTime  // Based on guarantee timeframe
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  @@map("payout")
 }
