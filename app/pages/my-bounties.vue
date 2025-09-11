@@ -198,9 +198,9 @@
                   {{ collaboration.bounty.title }}
                 </h3>
                 <Badge
-                  :variant="collaboration.isUnlocked ? 'default' : 'secondary'"
+                  :variant="getPartnershipStatusVariant(collaboration.status)"
                   class="text-xs">
-                  {{ collaboration.isUnlocked ? "Unlocked" : "Pending" }}
+                  {{ getPartnershipStatusLabel(collaboration.status) }}
                 </Badge>
                 <Badge
                   :variant="getBountyStatusVariant(collaboration.bounty.status)"
@@ -283,10 +283,27 @@
             </div>
           </div>
 
-          <!-- Submission Section (only if unlocked) -->
+          <!-- Rejection Reason (if rejected) -->
+          <div v-if="collaboration.status === 'REJECTED'" class="mt-6 pt-6 border-t">
+            <div class="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+              <div class="flex items-start gap-3">
+                <svg class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+                <div>
+                  <h4 class="text-sm font-medium text-red-800 dark:text-red-200 mb-1">Partnership Request Declined</h4>
+                  <p class="text-sm text-red-700 dark:text-red-300">
+                    {{ collaboration.rejectionReason || 'The company declined your partnership request.' }}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Submission Section (only if approved) -->
           <div
             v-if="
-              collaboration.isUnlocked && collaboration.bounty.status === 'OPEN'
+              collaboration.status === 'APPROVED' && collaboration.bounty.status === 'OPEN'
             "
             class="mt-6 pt-6 border-t">
             <div class="flex items-center justify-between mb-4">
@@ -442,11 +459,11 @@ const {
 
 // Computed stats
 const unlockedCollaborations = computed(
-  () => collaborations.value?.filter((c) => c.isUnlocked) || []
+  () => collaborations.value?.filter((c) => c.status === 'APPROVED') || []
 );
 
 const pendingCollaborations = computed(
-  () => collaborations.value?.filter((c) => !c.isUnlocked) || []
+  () => collaborations.value?.filter((c) => c.status === 'PENDING') || []
 );
 
 const totalSubmissions = computed(
@@ -495,6 +512,30 @@ const getSubmissionStatusVariant = (status: string) => {
       return "destructive";
     default:
       return "secondary";
+  }
+};
+
+const getPartnershipStatusVariant = (status: string) => {
+  switch (status) {
+    case "APPROVED":
+      return "default";
+    case "REJECTED":
+      return "destructive";
+    case "PENDING":
+    default:
+      return "secondary";
+  }
+};
+
+const getPartnershipStatusLabel = (status: string) => {
+  switch (status) {
+    case "APPROVED":
+      return "Approved";
+    case "REJECTED":
+      return "Rejected";
+    case "PENDING":
+    default:
+      return "Pending";
   }
 };
 

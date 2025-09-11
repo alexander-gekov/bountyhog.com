@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -30,6 +30,7 @@ model User {
   company       Company?
   recruiter     Recruiter?
   bountyNotes   BountyNote[]
+  notifications Notification[]
 
   @@unique([email])
   @@map("user")
@@ -99,6 +100,21 @@ enum SubmissionStatus {
   REJECTED
 }
 
+enum PartnershipStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum NotificationType {
+  PARTNERSHIP_REQUEST
+  PARTNERSHIP_APPROVED
+  PARTNERSHIP_REJECTED
+  SUBMISSION_RECEIVED
+  SUBMISSION_REVIEWED
+  BOUNTY_UPDATED
+}
+
 enum GuaranteeTimeframe {
   ONE_MONTH
   TWO_MONTHS
@@ -165,16 +181,21 @@ model Bounty {
 }
 
 model RecruiterCollaboration {
-  id          String   @id @default(cuid())
+  id          String            @id @default(cuid())
   bountyId    String
-  bounty      Bounty   @relation(fields: [bountyId], references: [id], onDelete: Cascade)
+  bounty      Bounty            @relation(fields: [bountyId], references: [id], onDelete: Cascade)
   recruiterId String
-  recruiter   Recruiter @relation(fields: [recruiterId], references: [id], onDelete: Cascade)
-  isUnlocked  Boolean  @default(false) // Company unlocks submission access
-  message     String?  // Initial interest message
-  submissions Submission[] // Submissions made through this collaboration
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  recruiter   Recruiter         @relation(fields: [recruiterId], references: [id], onDelete: Cascade)
+  isUnlocked  Boolean           @default(false) // Company unlocks submission access
+  status      PartnershipStatus @default(PENDING) // Partnership approval status
+  message     String?           // Initial interest message
+  introduction String?          // Recruiter's introduction message
+  rejectionReason String?       // Company's rejection reason if rejected
+  reviewedAt  DateTime?         // When the partnership was reviewed
+  reviewedBy  String?           // User ID who reviewed the partnership
+  submissions Submission[]      // Submissions made through this collaboration
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
   
   @@unique([bountyId, recruiterId])
   @@map("recruiter_collaboration")
@@ -243,4 +264,19 @@ model Payout {
   updatedAt   DateTime  @updatedAt
   
   @@map("payout")
+}
+
+model Notification {
+  id          String           @id @default(cuid())
+  userId      String
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type        NotificationType
+  title       String
+  message     String
+  data        Json?            // Additional data for the notification
+  isRead      Boolean          @default(false)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  
+  @@map("notification")
 }

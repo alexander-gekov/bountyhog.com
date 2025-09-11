@@ -68,15 +68,48 @@ export default defineEventHandler(async (event) => {
       })
     }
 
+    // Get bounty details for notification
+    const bountyDetails = await prisma.bounty.findUnique({
+      where: { id },
+      include: {
+        company: {
+          include: {
+            user: true
+          }
+        }
+      }
+    })
+
     // Create collaboration
     const collaboration = await prisma.recruiterCollaboration.create({
       data: {
         bountyId: id,
         recruiterId: recruiter.id,
         message: body.message || 'Interested in working on this bounty',
-        isUnlocked: false
+        introduction: body.introduction || null,
+        isUnlocked: false,
+        status: 'PENDING'
       }
     })
+
+    // Create notification for the company
+    if (bountyDetails?.company.user) {
+      await prisma.notification.create({
+        data: {
+          userId: bountyDetails.company.userId,
+          type: 'PARTNERSHIP_REQUEST',
+          title: 'New Partnership Request',
+          message: `${session.user.name} wants to work on your bounty "${bountyDetails.title}".`,
+          data: {
+            bountyId: id,
+            bountyTitle: bountyDetails.title,
+            recruiterName: session.user.name,
+            recruiterId: recruiter.id,
+            collaborationId: collaboration.id
+          }
+        }
+      })
+    }
 
     return { success: true, collaboration }
   } catch (error: any) {
