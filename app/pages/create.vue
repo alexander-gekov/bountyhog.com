@@ -34,7 +34,7 @@
               <Label for="title">Job Title *</Label>
               <Input
                 id="title"
-                v-model="form.title"
+                v-model:model-value="form.title"
                 placeholder="Senior Full Stack Developer"
                 required />
             </div>
@@ -43,7 +43,7 @@
               <Label for="description">Job Description *</Label>
               <Textarea
                 id="description"
-                v-model="form.description"
+                v-model:model-value="form.description"
                 placeholder="Describe the role, responsibilities, and what you're looking for in a candidate..."
                 rows="6"
                 required />
@@ -83,14 +83,14 @@
                 <Label for="deadline">Application Deadline</Label>
                 <Input
                   id="deadline"
-                  v-model="form.deadline"
+                  v-model:model-value="form.deadline"
                   type="date"
                   :min="minDate" />
               </div>
 
               <div>
                 <Label for="guaranteeTimeframe">Guarantee Timeframe *</Label>
-                <Select v-model="form.guaranteeTimeframe" required>
+                <Select v-model:model-value="form.guaranteeTimeframe" required>
                   <SelectTrigger>
                     <SelectValue placeholder="Select timeframe" />
                   </SelectTrigger>
@@ -115,70 +115,70 @@
           <CardContent class="space-y-6">
             <div>
               <Label>Payout Type *</Label>
-              <div class="flex items-center space-x-6 mt-2">
-                <div class="flex items-center space-x-2">
-                  <input
-                    id="cash"
-                    v-model="form.payoutType"
-                    type="radio"
-                    value="CASH"
-                    class="w-4 h-4 text-primary" />
-                  <Label for="cash" class="text-sm font-normal"
-                    >Fixed Cash Amount</Label
-                  >
+              <RadioGroup v-model:model-value="form.payoutType" class="mt-2">
+                <div class="flex items-center space-x-6">
+                  <div class="flex items-center space-x-2">
+                    <RadioGroupItem id="cash" value="CASH" />
+                    <Label for="cash" class="text-sm font-normal"
+                      >Fixed Cash Amount</Label
+                    >
+                  </div>
+                  <div class="flex items-center space-x-2">
+                    <RadioGroupItem id="percentage" value="PERCENTAGE" />
+                    <Label for="percentage" class="text-sm font-normal"
+                      >Percentage of Salary</Label
+                    >
+                  </div>
                 </div>
-                <div class="flex items-center space-x-2">
-                  <input
-                    id="percentage"
-                    v-model="form.payoutType"
-                    type="radio"
-                    value="PERCENTAGE"
-                    class="w-4 h-4 text-primary" />
-                  <Label for="percentage" class="text-sm font-normal"
-                    >Percentage of Salary</Label
-                  >
-                </div>
-              </div>
+              </RadioGroup>
             </div>
 
             <div v-if="form.payoutType === 'CASH'">
-              <Label for="payoutAmount">Cash Amount (USD) *</Label>
-              <div class="relative">
-                <span
-                  class="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground"
-                  >$</span
-                >
-                <Input
-                  id="payoutAmount"
-                  v-model:number="form.payoutAmount"
-                  type="number"
-                  min="100"
-                  step="100"
-                  placeholder="5000"
-                  class="pl-8"
-                  required />
-              </div>
+              <NumberField
+                id="payoutAmount"
+                v-model:model-value="form.payoutAmount"
+                :min="100"
+                :step="100"
+                :default-value="5000"
+                :format-options="{
+                  style: 'currency',
+                  currency: 'USD',
+                  currencyDisplay: 'symbol',
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0,
+                }">
+                <Label for="payoutAmount">Cash Amount (USD) *</Label>
+                <NumberFieldContent>
+                  <NumberFieldDecrement />
+                  <NumberFieldInput />
+                  <NumberFieldIncrement />
+                </NumberFieldContent>
+              </NumberField>
             </div>
 
             <div v-if="form.payoutType === 'PERCENTAGE'">
-              <Label for="payoutPercentage"
-                >Percentage of Annual Salary *</Label
-              >
-              <div class="relative">
-                <Input
-                  id="payoutPercentage"
-                  v-model:number="form.payoutPercentage"
-                  min="5"
-                  max="50"
-                  step="0.5"
-                  placeholder="15"
-                  class="pr-8"
-                  required />
-                <span
-                  class="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground"
-                  >%</span
+              <NumberField
+                id="payoutPercentage"
+                v-model:model-value="form.payoutPercentage"
+                :min="5"
+                :max="50"
+                :step="0.5"
+                :default-value="15"
+                :format-options="{
+                  style: 'unit',
+                  unit: 'percent',
+                  minimumFractionDigits: 1,
+                  maximumFractionDigits: 1,
+                }">
+                <Label for="payoutPercentage"
+                  >Percentage of Annual Salary *</Label
                 >
-              </div>
+                <NumberFieldContent>
+                  <NumberFieldDecrement />
+                  <NumberFieldInput />
+                  <NumberFieldIncrement />
+                </NumberFieldContent>
+              </NumberField>
             </div>
           </CardContent>
         </Card>
@@ -197,7 +197,7 @@
               :key="index"
               class="flex items-center gap-2">
               <Input
-                v-model="form.requirements[index]"
+                v-model:model-value="form.requirements[index]"
                 placeholder="e.g., 5+ years of React experience"
                 class="flex-1" />
               <Button
@@ -245,7 +245,7 @@
               <Label for="interviewProcess">Interview Process</Label>
               <Textarea
                 id="interviewProcess"
-                v-model="form.interviewProcess"
+                v-model:model-value="form.interviewProcess"
                 placeholder="Describe your interview process (e.g., 3 rounds: Technical screening, System design, Cultural fit)"
                 rows="3" />
             </div>
@@ -254,7 +254,7 @@
               <Label for="guidelines">Guidelines for Recruiters</Label>
               <Textarea
                 id="guidelines"
-                v-model="form.guidelines"
+                v-model:model-value="form.guidelines"
                 placeholder="Any specific guidelines, preferences, or instructions for recruiters working on this bounty"
                 rows="3" />
             </div>
@@ -275,7 +275,7 @@
               <Label for="companyName">Company Name *</Label>
               <Input
                 id="companyName"
-                v-model="form.companyName"
+                v-model:model-value="form.companyName"
                 placeholder="Your Company Name"
                 required />
             </div>
@@ -284,7 +284,7 @@
               <Label for="companyDescription">Company Description</Label>
               <Textarea
                 id="companyDescription"
-                v-model="form.companyDescription"
+                v-model:model-value="form.companyDescription"
                 placeholder="Brief description of your company and what you do"
                 rows="3" />
             </div>
@@ -293,7 +293,7 @@
               <Label for="companyWebsite">Company Website</Label>
               <Input
                 id="companyWebsite"
-                v-model="form.companyWebsite"
+                v-model:model-value="form.companyWebsite"
                 type="url"
                 placeholder="https://yourcompany.com" />
             </div>
@@ -337,8 +337,8 @@ const form = ref({
   deadline: "",
   guaranteeTimeframe: "",
   payoutType: "CASH",
-  payoutAmount: null as number | null,
-  payoutPercentage: null as number | null,
+  payoutAmount: 5000 as number | null,
+  payoutPercentage: 8 as number | null,
   requirements: [""],
   interviewProcess: "",
   guidelines: "",
@@ -370,6 +370,20 @@ const isFormValid = computed(() => {
       : form.value.payoutPercentage && form.value.payoutPercentage > 0;
 
   const companyValid = userCompany.value || form.value.companyName;
+
+  console.log("Form Validation Debug:", {
+    basicValid,
+    title: form.value.title,
+    description: form.value.description,
+    guaranteeTimeframe: form.value.guaranteeTimeframe,
+    payoutType: form.value.payoutType,
+    payoutValid,
+    payoutAmount: form.value.payoutAmount,
+    payoutPercentage: form.value.payoutPercentage,
+    companyValid,
+    userCompany: userCompany.value,
+    companyName: form.value.companyName,
+  });
 
   return basicValid && payoutValid && companyValid;
 });

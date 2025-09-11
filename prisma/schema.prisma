@@ -30,6 +30,7 @@ model User {
   company       Company?
   recruiter     Recruiter?
   bountyNotes   BountyNote[]
+  notifications Notification[]
 
   @@unique([email])
   @@map("user")
@@ -165,16 +166,21 @@ model Bounty {
 }
 
 model RecruiterCollaboration {
-  id          String   @id @default(cuid())
-  bountyId    String
-  bounty      Bounty   @relation(fields: [bountyId], references: [id], onDelete: Cascade)
-  recruiterId String
-  recruiter   Recruiter @relation(fields: [recruiterId], references: [id], onDelete: Cascade)
-  isUnlocked  Boolean  @default(false) // Company unlocks submission access
-  message     String?  // Initial interest message
-  submissions Submission[] // Submissions made through this collaboration
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id            String   @id @default(cuid())
+  bountyId      String
+  bounty        Bounty   @relation(fields: [bountyId], references: [id], onDelete: Cascade)
+  recruiterId   String
+  recruiter     Recruiter @relation(fields: [recruiterId], references: [id], onDelete: Cascade)
+  isUnlocked    Boolean  @default(false) // Company unlocks submission access
+  message       String?  // Initial interest message
+  introduction  String?  // Recruiter's introduction
+  status        String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  reviewedAt    DateTime?
+  reviewedBy    String?
+  rejectionReason String?
+  submissions   Submission[] // Submissions made through this collaboration
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
   
   @@unique([bountyId, recruiterId])
   @@map("recruiter_collaboration")
@@ -243,4 +249,25 @@ model Payout {
   updatedAt   DateTime  @updatedAt
   
   @@map("payout")
+}
+
+enum NotificationType {
+  PARTNERSHIP_REQUEST
+  PARTNERSHIP_APPROVED
+  PARTNERSHIP_REJECTED
+}
+
+model Notification {
+  id        String          @id @default(cuid())
+  userId    String
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      NotificationType
+  title     String
+  message   String
+  data      Json?          // For storing notification-specific data
+  isRead    Boolean        @default(false)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@map("notification")
 }
