@@ -150,7 +150,7 @@
                 >
                 <Input
                   id="payoutAmount"
-                  v-model:number="form.payoutAmount"
+                  v-model.number="form.payoutAmount"
                   type="number"
                   min="100"
                   step="100"
@@ -167,7 +167,8 @@
               <div class="relative">
                 <Input
                   id="payoutPercentage"
-                  v-model:number="form.payoutPercentage"
+                  v-model.number="form.payoutPercentage"
+                  type="number"
                   min="5"
                   max="50"
                   step="0.5"
@@ -336,9 +337,9 @@ const form = ref({
   description: "",
   deadline: "",
   guaranteeTimeframe: "",
-  payoutType: "CASH",
-  payoutAmount: null as number | null,
-  payoutPercentage: null as number | null,
+  payoutType: "CASH" as "CASH" | "PERCENTAGE",
+  payoutAmount: 0 as number,
+  payoutPercentage: 0 as number,
   requirements: [""],
   interviewProcess: "",
   guidelines: "",
@@ -359,17 +360,17 @@ const minDate = computed(() => {
 
 const isFormValid = computed(() => {
   const basicValid =
-    form.value.title &&
-    form.value.description &&
+    form.value.title.trim() &&
+    form.value.description.trim() &&
     form.value.guaranteeTimeframe &&
     form.value.payoutType;
 
   const payoutValid =
     form.value.payoutType === "CASH"
-      ? form.value.payoutAmount && form.value.payoutAmount > 0
-      : form.value.payoutPercentage && form.value.payoutPercentage > 0;
+      ? form.value.payoutAmount > 0
+      : form.value.payoutPercentage > 0;
 
-  const companyValid = userCompany.value || form.value.companyName;
+  const companyValid = userCompany.value || (form.value.companyName && form.value.companyName.trim());
 
   return basicValid && payoutValid && companyValid;
 });
@@ -440,9 +441,9 @@ const submitBounty = async () => {
       guaranteeTimeframe: form.value.guaranteeTimeframe,
       payoutType: form.value.payoutType,
       payoutAmount:
-        form.value.payoutType === "CASH" ? form.value.payoutAmount : null,
+        form.value.payoutType === "CASH" && form.value.payoutAmount > 0 ? form.value.payoutAmount : null,
       payoutPercentage:
-        form.value.payoutType === "PERCENTAGE"
+        form.value.payoutType === "PERCENTAGE" && form.value.payoutPercentage > 0
           ? form.value.payoutPercentage
           : null,
       requirements: form.value.requirements.filter((req) => req.trim()),
