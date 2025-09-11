@@ -21,6 +21,12 @@
                 Bounties
               </NuxtLink>
               <NuxtLink
+                v-if="session.data?.user.userType === 'COMPANY'"
+                to="/dashboard"
+                class="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+                Dashboard
+              </NuxtLink>
+              <NuxtLink
                 v-if="session.data?.user.userType === 'RECRUITER'"
                 to="/my-bounties"
                 class="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
@@ -35,6 +41,7 @@
           </div>
 
           <div class="flex items-center space-x-4">
+            <NotificationDropdown />
             <DropdownMenu>
               <DropdownMenuTrigger as-child>
                 <Button size="sm" variant="ghost">

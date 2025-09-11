@@ -179,20 +179,62 @@
                 <p class="text-sm text-muted-foreground">
                   Express your interest to start working on this bounty.
                 </p>
-                <Button @click="expressInterest" :disabled="isExpressingInterest" class="w-full">
-                  <template v-if="isExpressingInterest">Expressing Interest...</template>
-                  <template v-else>Let's Work Together</template>
-                </Button>
+                <div v-if="!showInterestForm">
+                  <Button @click="showInterestForm = true" class="w-full">
+                    Let's Work Together
+                  </Button>
+                </div>
+                <div v-else class="space-y-4">
+                  <div>
+                    <Label for="introduction">Introduce Yourself</Label>
+                    <Textarea 
+                      id="introduction"
+                      v-model="introductionText"
+                      placeholder="Tell the company why you're interested in this bounty and what makes you a good fit..."
+                      rows="4"
+                      class="mt-1"
+                    />
+                  </div>
+                  <div class="flex gap-2">
+                    <Button 
+                      @click="expressInterest" 
+                      :disabled="isExpressingInterest || !introductionText.trim()" 
+                      class="flex-1"
+                    >
+                      <template v-if="isExpressingInterest">Submitting...</template>
+                      <template v-else>Submit Application</template>
+                    </Button>
+                    <Button 
+                      @click="cancelInterest" 
+                      variant="outline" 
+                      :disabled="isExpressingInterest"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
               </template>
               
-              <template v-else-if="!collaboration?.isUnlocked">
+              <template v-else-if="collaboration?.status === 'PENDING'">
                 <div class="text-center py-4">
                   <svg class="w-12 h-12 text-amber-500 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                   </svg>
-                  <p class="text-sm font-medium">Interest Expressed</p>
+                  <p class="text-sm font-medium">Application Submitted</p>
                   <p class="text-xs text-muted-foreground mt-1">
-                    Waiting for company approval to start submissions
+                    Waiting for company approval to start working together
+                  </p>
+                </div>
+              </template>
+              
+              <template v-else-if="collaboration?.status === 'REJECTED'">
+                <div class="text-center py-4">
+                  <svg class="w-12 h-12 text-red-500 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                  </svg>
+                  <p class="text-sm font-medium">Application Declined</p>
+                  <p class="text-xs text-muted-foreground mt-1">
+                    {{ collaboration?.rejectionReason || 'The company has declined your partnership request' }}
                   </p>
                 </div>
               </template>
@@ -259,7 +301,9 @@
                 <div class="flex-1 min-w-0">
                   <p class="text-sm font-medium truncate">{{ collab.recruiter.user.name }}</p>
                   <p class="text-xs text-muted-foreground">
-                    {{ collab.isUnlocked ? 'Approved' : 'Pending approval' }}
+                    <template v-if="collab.status === 'APPROVED'">Approved</template>
+                    <template v-else-if="collab.status === 'REJECTED'">Rejected</template>
+                    <template v-else>Pending approval</template>
                   </p>
                 </div>
               </div>
@@ -306,25 +350,36 @@ const isCollaborating = computed(() => !!collaboration.value)
 // Form state
 const newNote = ref('')
 const isExpressingInterest = ref(false)
+const showInterestForm = ref(false)
+const introductionText = ref('')
 
 // Express interest
 const expressInterest = async () => {
-  if (!user.value) return
+  if (!user.value || !introductionText.value.trim()) return
   
   isExpressingInterest.value = true
   try {
     await $fetch(`/api/bounties/${bountyId}/collaborate`, {
       method: 'POST',
       body: {
-        message: 'I\'m interested in working on this bounty.'
+        message: 'I\'m interested in working on this bounty.',
+        introduction: introductionText.value.trim()
       }
     })
+    showInterestForm.value = false
+    introductionText.value = ''
     await refresh()
   } catch (error) {
     console.error('Failed to express interest:', error)
   } finally {
     isExpressingInterest.value = false
   }
+}
+
+// Cancel interest form
+const cancelInterest = () => {
+  showInterestForm.value = false
+  introductionText.value = ''
 }
 
 // Submit note
