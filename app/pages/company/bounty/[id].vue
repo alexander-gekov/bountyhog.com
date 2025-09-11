@@ -329,9 +329,19 @@
                     You can now submit candidates
                   </p>
                 </div>
-                <Button class="w-full" @click="navigateTo('/my-bounties')">
-                  Go to My Bounties
-                </Button>
+                <div class="space-y-3">
+                  <Button 
+                    class="w-full" 
+                    @click="showSubmissionForm = !showSubmissionForm">
+                    {{ showSubmissionForm ? 'Hide Form' : 'Submit Candidate' }}
+                  </Button>
+                  <Button 
+                    class="w-full" 
+                    variant="outline" 
+                    @click="navigateTo('/my-bounties')">
+                    Go to My Bounties
+                  </Button>
+                </div>
               </template>
             </template>
 
@@ -344,6 +354,28 @@
             </template>
           </CardContent>
         </Card>
+
+        <!-- Submission Form (for approved recruiters) -->
+        <div
+          v-if="
+            showSubmissionForm &&
+            user?.userType === 'RECRUITER' &&
+            collaboration?.status === 'APPROVED' &&
+            bounty?.status === 'OPEN'
+          ">
+          <CandidateSubmissionForm
+            :bounty="bounty ? {
+              id: bounty.id,
+              title: bounty.title,
+              requirements: bounty.requirements,
+              guidelines: bounty.guidelines
+            } : undefined"
+            :collaboration-id="collaboration?.id"
+            :is-submitting="isSubmittingCandidate"
+            :show-cancel="true"
+            @submit="handleCandidateSubmission"
+            @cancel="showSubmissionForm = false" />
+        </div>
 
         <!-- Company Info -->
         <Card>
@@ -447,6 +479,8 @@ const newNote = ref("");
 const isExpressingInterest = ref(false);
 const showInterestForm = ref(false);
 const introductionText = ref("");
+const showSubmissionForm = ref(false);
+const isSubmittingCandidate = ref(false);
 
 // Express interest
 const expressInterest = async () => {
@@ -492,6 +526,45 @@ const submitNote = async () => {
     await refresh();
   } catch (error) {
     console.error("Failed to submit note:", error);
+  }
+};
+
+// Handle candidate submission
+const handleCandidateSubmission = async (payload: {
+  form: {
+    candidateName: string;
+    candidateEmail: string;
+    notes: string;
+    file: File | null;
+    acknowledgeCompliance: boolean;
+  };
+  collaborationId?: string;
+}) => {
+  const { form, collaborationId } = payload;
+  
+  if (!form.candidateName || !form.file || !collaborationId) return;
+
+  isSubmittingCandidate.value = true;
+
+  try {
+    // Create FormData for file upload
+    const formData = new FormData();
+    formData.append("candidateName", form.candidateName);
+    formData.append("candidateEmail", form.candidateEmail || "");
+    formData.append("notes", form.notes || "");
+    formData.append("file", form.file);
+
+    await $fetch(`/api/collaborations/${collaborationId}/submit`, {
+      method: "POST",
+      body: formData,
+    });
+
+    showSubmissionForm.value = false;
+    await refresh();
+  } catch (error) {
+    console.error("Failed to submit candidate:", error);
+  } finally {
+    isSubmittingCandidate.value = false;
   }
 };
 

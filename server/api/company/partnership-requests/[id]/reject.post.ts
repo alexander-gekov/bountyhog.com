@@ -1,47 +1,49 @@
-import { PrismaClient } from '@prisma/client'
-import { auth } from '@/lib/auth'
+import { PrismaClient } from "@prisma/client";
+import { auth } from "@/lib/auth";
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
 export default defineEventHandler(async (event) => {
-  const requestId = getRouterParam(event, 'id')
-  const body = await readBody(event)
-  
+  const requestId = getRouterParam(event, "id");
+  const body = await readBody(event);
+
   if (!requestId) {
     throw createError({
       statusCode: 400,
-      statusMessage: 'Partnership request ID is required'
-    })
+      statusMessage: "Partnership request ID is required",
+    });
   }
 
   // Check authentication
-  const session = await auth.api.getSession({ headers: event.node.req.headers })
+  const session = await auth.api.getSession({
+    headers: event.node.req.headers,
+  });
   if (!session?.user) {
     throw createError({
       statusCode: 401,
-      statusMessage: 'Authentication required'
-    })
+      statusMessage: "Authentication required",
+    });
   }
 
   // Check if user is a company
-  if (session.user.userType !== 'COMPANY') {
+  if (session.user.userType !== "COMPANY") {
     throw createError({
       statusCode: 403,
-      statusMessage: 'Only companies can reject partnership requests'
-    })
+      statusMessage: "Only companies can reject partnership requests",
+    });
   }
 
   try {
     // Get company profile
     let company = await prisma.company.findUnique({
-      where: { userId: session.user.id }
-    })
+      where: { userId: session.user.id },
+    });
 
     if (!company) {
       throw createError({
         statusCode: 404,
-        statusMessage: 'Company profile not found'
-      })
+        statusMessage: "Company profile not found",
+      });
     }
 
     // Verify the partnership request belongs to this company
@@ -51,66 +53,66 @@ export default defineEventHandler(async (event) => {
         bounty: true,
         recruiter: {
           include: {
-            user: true
-          }
-        }
-      }
-    })
+            user: true,
+          },
+        },
+      },
+    });
 
     if (!partnershipRequest) {
       throw createError({
         statusCode: 404,
-        statusMessage: 'Partnership request not found'
-      })
+        statusMessage: "Partnership request not found",
+      });
     }
 
     if (partnershipRequest.bounty.companyId !== company.id) {
       throw createError({
         statusCode: 403,
-        statusMessage: 'You can only reject requests for your own bounties'
-      })
+        statusMessage: "You can only reject requests for your own bounties",
+      });
     }
 
-    if (partnershipRequest.status !== 'PENDING') {
+    if (partnershipRequest.status !== "PENDING") {
       throw createError({
         statusCode: 400,
-        statusMessage: 'Partnership request has already been processed'
-      })
+        statusMessage: "Partnership request has already been processed",
+      });
     }
 
     // Reject the partnership request
     const updatedRequest = await prisma.recruiterCollaboration.update({
       where: { id: requestId },
       data: {
-        status: 'REJECTED',
-        rejectionReason: body.reason || 'No reason provided',
+        status: "REJECTED",
+        rejectionReason: body.reason || "No reason provided",
         reviewedAt: new Date(),
-        reviewedBy: session.user.id
-      }
-    })
+        reviewedBy: session.user.id,
+      },
+    });
 
     // Create notification for the recruiter
     await prisma.notification.create({
       data: {
         userId: partnershipRequest.recruiter.userId,
-        type: 'PARTNERSHIP_REJECTED',
-        title: 'Partnership Request Declined',
+        type: "PARTNERSHIP_REJECTED",
+        title: "Partnership Request Declined",
         message: `Your partnership request for "${partnershipRequest.bounty.title}" has been declined.`,
         data: {
           bountyId: partnershipRequest.bountyId,
           bountyTitle: partnershipRequest.bounty.title,
           companyName: company.companyName,
-          rejectionReason: body.reason || 'No reason provided'
-        }
-      }
-    })
+          rejectionReason: body.reason || "No reason provided",
+        },
+      },
+    });
 
-    return { success: true, request: updatedRequest }
+    return { success: true, request: updatedRequest };
   } catch (error: any) {
-    console.error('Error rejecting partnership:', error)
+    console.error("Error rejecting partnership:", error);
     throw createError({
       statusCode: 500,
-      statusMessage: 'Failed to reject partnership request'
-    })
+      statusMessage: "Failed to reject partnership request",
+    });
   }
-})
+});
