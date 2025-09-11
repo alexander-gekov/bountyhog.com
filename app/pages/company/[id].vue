@@ -143,57 +143,11 @@
       v-if="filteredBounties.length"
       class="relative -mx-2 -mt-2 overflow-auto scrollbar-thin">
       <ul class="divide-y divide-border">
-        <a
+        <Bounty
           v-for="bounty in filteredBounties"
           :key="bounty.id"
-          :href="`/company/bounty/${bounty.id}`"
-          class="block whitespace-nowrap hover:bg-muted/50">
-          <li class="flex items-center py-2 px-3">
-            <div class="flex-shrink-0 mr-3">
-              <div
-                class="relative rounded-full shrink-0 overflow-hidden w-8 h-8">
-                <span
-                  class="flex rounded-full bg-muted items-center justify-center w-full h-full text-sm font-semibold">
-                  {{ company.companyName.charAt(0).toUpperCase()
-                  }}{{ company.companyName.charAt(1)?.toUpperCase() || "" }}
-                </span>
-              </div>
-            </div>
-
-            <div class="flex-grow min-w-0 mr-4">
-              <div class="flex items-center text-sm">
-                <span class="font-semibold mr-1">
-                  {{ company.companyName }}
-                </span>
-                <span class="text-muted-foreground mr-2">
-                  #{{ bounty.id.slice(-4) }}
-                </span>
-                <Badge
-                  :variant="getBadgeVariant(bounty.status)"
-                  class="text-xs mr-2">
-                  {{ bounty.status }}
-                </Badge>
-                <span
-                  class="font-display whitespace-nowrap text-sm font-semibold tabular-nums text-success mr-2">
-                  <template v-if="bounty.payoutType === 'CASH'">
-                    ${{ bounty.payoutAmount?.toLocaleString() }}
-                  </template>
-                  <template v-else> {{ bounty.payoutPercentage }}% </template>
-                </span>
-                <span class="text-foreground">{{ bounty.title }}</span>
-              </div>
-              <div
-                class="flex items-center gap-3 text-xs text-muted-foreground mt-1">
-                <span v-if="bounty.deadline">{{
-                  formatDate(bounty.deadline)
-                }}</span>
-                <span>{{ bounty._count?.collaborations || 0 }} recruiters</span>
-                <span>{{ bounty._count?.submissions || 0 }} submissions</span>
-                <span>Created {{ formatDate(bounty.createdAt) }}</span>
-              </div>
-            </div>
-          </li>
-        </a>
+          :bounty="bounty"
+          :company-name="company.companyName" />
       </ul>
     </div>
 

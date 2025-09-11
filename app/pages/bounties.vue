@@ -59,38 +59,10 @@
         v-else-if="filteredBounties?.length"
         class="relative -mx-2 -mt-2 overflow-auto scrollbar-thin">
         <ul class="divide-y divide-border">
-          <a
+          <Bounty
             v-for="bounty in filteredBounties"
             :key="bounty.id"
-            :href="`/company/bounty/${bounty.id}`"
-            class="block whitespace-nowrap hover:bg-muted/50">
-            <li class="flex items-center py-2 px-3">
-              <div class="flex-shrink-0 mr-3">
-                <div
-                  class="relative rounded-full shrink-0 overflow-hidden w-8 h-8">
-                  <img
-                    :src="`https://picsum.photos/20?random=${bounty.company.companyName}`"
-                    :alt="bounty.company.companyName"
-                    class="w-full h-full object-cover rounded-full" />
-                </div>
-              </div>
-
-              <div class="flex-grow min-w-0 mr-4">
-                <div class="flex items-center gap-4 text-sm">
-                  <span class="font-semibold mr-1">
-                    {{ bounty.company.companyName }}
-                  </span>
-                  <Badge variant="default" size="md" class="mr-2">
-                    <template v-if="bounty.payoutType === 'CASH'">
-                      ${{ bounty.payoutAmount?.toLocaleString() }}
-                    </template>
-                    <template v-else> {{ bounty.payoutPercentage }}% </template>
-                  </Badge>
-                  <span class="text-foreground">{{ bounty.title }}</span>
-                </div>
-              </div>
-            </li>
-          </a>
+            :bounty="bounty" />
         </ul>
 
         <!-- Load More Button -->

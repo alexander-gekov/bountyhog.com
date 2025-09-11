@@ -436,7 +436,7 @@ const requirements = computed(() => {
 const collaboration = computed(() => {
   if (!user.value || !bounty.value?.collaborations) return null;
   return bounty.value.collaborations.find(
-    (c) => c.recruiter.userId === user.value.id
+    (c) => c.recruiter.userId === user.value?.id
   );
 });
 

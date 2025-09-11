@@ -65,394 +65,216 @@
       </div>
 
       <!-- Stats Cards -->
-      <div v-else class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <Card>
-          <CardContent class="p-6">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-sm font-medium text-muted-foreground">
-                  Total Collaborations
-                </p>
-                <p class="text-2xl font-bold">
-                  {{ collaborations?.length || 0 }}
-                </p>
-              </div>
-              <div
-                class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                <svg
-                  class="w-6 h-6 text-primary"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24">
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                </svg>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent class="p-6">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-sm font-medium text-muted-foreground">
-                  Unlocked
-                </p>
-                <p class="text-2xl font-bold">
-                  {{ unlockedCollaborations.length }}
-                </p>
-              </div>
-              <div
-                class="w-12 h-12 bg-green-500/10 rounded-lg flex items-center justify-center">
-                <svg
-                  class="w-6 h-6 text-green-500"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24">
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent class="p-6">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-sm font-medium text-muted-foreground">
-                  Pending Approval
-                </p>
-                <p class="text-2xl font-bold">
-                  {{ pendingCollaborations.length }}
-                </p>
-              </div>
-              <div
-                class="w-12 h-12 bg-amber-500/10 rounded-lg flex items-center justify-center">
-                <svg
-                  class="w-6 h-6 text-amber-500"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24">
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent class="p-6">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-sm font-medium text-muted-foreground">
-                  Total Submissions
-                </p>
-                <p class="text-2xl font-bold">{{ totalSubmissions }}</p>
-              </div>
-              <div
-                class="w-12 h-12 bg-blue-500/10 rounded-lg flex items-center justify-center">
-                <svg
-                  class="w-6 h-6 text-blue-500"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24">
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                </svg>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      <div v-else class="flex flex-wrap gap-4 mb-6">
+        <div class="flex items-center gap-6 w-full bg-muted/40 rounded-lg p-4">
+          <div class="flex items-center gap-3">
+            <p class="text-sm text-muted-foreground">Total</p>
+            <p class="text-lg font-medium">{{ collaborations?.length || 0 }}</p>
+          </div>
+          <div class="h-4 w-px bg-border"></div>
+          <div class="flex items-center gap-3">
+            <p class="text-sm text-muted-foreground">Unlocked</p>
+            <p class="text-lg font-medium">
+              {{ unlockedCollaborations.length }}
+            </p>
+          </div>
+          <div class="h-4 w-px bg-border"></div>
+          <div class="flex items-center gap-3">
+            <p class="text-sm text-muted-foreground">Pending</p>
+            <p class="text-lg font-medium">
+              {{ pendingCollaborations.length }}
+            </p>
+          </div>
+          <div class="h-4 w-px bg-border"></div>
+          <div class="flex items-center gap-3">
+            <p class="text-sm text-muted-foreground">Submissions</p>
+            <p class="text-lg font-medium">{{ totalSubmissions }}</p>
+          </div>
+        </div>
       </div>
 
       <!-- Bounties List -->
-      <div v-if="collaborations?.length" class="space-y-6">
-        <div
-          v-for="collaboration in collaborations"
-          :key="collaboration.id"
-          class="border rounded-lg p-6">
-          <div class="flex items-start justify-between mb-4">
-            <div class="flex-1">
-              <div class="flex items-center gap-3 mb-2">
-                <h3
-                  class="text-lg font-semibold text-foreground hover:text-primary transition-colors cursor-pointer"
-                  @click="
-                    navigateTo(`/company/bounty/${collaboration.bounty.id}`)
-                  ">
-                  {{ collaboration.bounty.title }}
-                </h3>
-                <Badge
-                  :variant="getPartnershipStatusVariant(collaboration.status)"
-                  class="text-xs">
-                  {{ getPartnershipStatusLabel(collaboration.status) }}
-                </Badge>
-                <Badge
-                  :variant="getBountyStatusVariant(collaboration.bounty.status)"
-                  class="text-xs">
-                  {{ collaboration.bounty.status }}
-                </Badge>
+      <div v-if="collaborations?.length" class="relative -mx-2 -mt-2">
+        <ul class="divide-y divide-border">
+          <li
+            v-for="collaboration in collaborations"
+            :key="collaboration.id"
+            class="group">
+            <div
+              class="flex flex-col cursor-pointer"
+              @click="navigateTo(`/company/bounty/${collaboration.bounty.id}`)">
+              <div class="hover:bg-muted/50 transition-colors">
+                <Bounty :bounty="collaboration.bounty">
+                  <div class="text-xs text-muted-foreground">
+                    <div class="flex items-center gap-2">
+                      <span>{{
+                        getPartnershipStatusLabel(collaboration.status)
+                      }}</span>
+                      <span v-if="collaboration.bounty.deadline">•</span>
+                      <span v-if="collaboration.bounty.deadline">{{
+                        formatDate(collaboration.bounty.deadline)
+                      }}</span>
+                      <span>•</span>
+                      <span
+                        >{{
+                          collaboration.submissions?.length || 0
+                        }}
+                        submissions</span
+                      >
+                    </div>
+                  </div>
+                </Bounty>
               </div>
 
-              <p class="text-sm text-muted-foreground mb-3">
-                {{ collaboration.bounty.description }}
-              </p>
-
+              <!-- Rejection Reason (if rejected) -->
               <div
-                class="flex items-center gap-4 text-xs text-muted-foreground">
-                <div class="flex items-center gap-1">
-                  <svg
-                    class="w-3 h-3"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24">
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                  </svg>
-                  {{ collaboration.bounty.company.companyName }}
-                </div>
-
-                <div
-                  v-if="collaboration.bounty.deadline"
-                  class="flex items-center gap-1">
-                  <svg
-                    class="w-3 h-3"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24">
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                  </svg>
-                  {{ formatDate(collaboration.bounty.deadline) }}
-                </div>
-
-                <div class="flex items-center gap-1">
-                  <svg
-                    class="w-3 h-3"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24">
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                  </svg>
-                  {{ collaboration.submissions?.length || 0 }} submissions
-                </div>
-              </div>
-            </div>
-
-            <div class="text-right">
-              <div class="text-lg font-bold text-foreground">
-                <template v-if="collaboration.bounty.payoutType === 'CASH'">
-                  ${{ collaboration.bounty.payoutAmount?.toLocaleString() }}
-                </template>
-                <template v-else>
-                  {{ collaboration.bounty.payoutPercentage }}%
-                </template>
-              </div>
-              <div class="text-xs text-muted-foreground">
-                {{
-                  collaboration.bounty.payoutType === "CASH"
-                    ? "Cash"
-                    : "Percentage"
-                }}
-              </div>
-            </div>
-          </div>
-
-          <!-- Rejection Reason (if rejected) -->
-          <div
-            v-if="collaboration.status === 'REJECTED'"
-            class="mt-6 pt-6 border-t">
-            <div
-              class="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-              <div class="flex items-start gap-3">
-                <svg
-                  class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24">
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M6 18L18 6M6 6l12 12"></path>
-                </svg>
-                <div>
-                  <h4
-                    class="text-sm font-medium text-red-800 dark:text-red-200 mb-1">
-                    Partnership Request Declined
-                  </h4>
-                  <p class="text-sm text-red-700 dark:text-red-300">
-                    {{
-                      collaboration.rejectionReason ||
-                      "The company declined your partnership request."
-                    }}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Submission Section (only if approved) -->
-          <div
-            v-if="
-              collaboration.status === 'APPROVED' &&
-              collaboration.bounty.status === 'OPEN'
-            "
-            class="mt-6 pt-6 border-t">
-            <div class="flex items-center justify-between mb-4">
-              <h4 class="text-sm font-medium">Submit Candidate</h4>
-              <Button
-                @click="toggleSubmissionForm(collaboration.id)"
-                variant="outline"
-                size="sm">
-                {{
-                  showSubmissionForm === collaboration.id
-                    ? "Cancel"
-                    : "New Submission"
-                }}
-              </Button>
-            </div>
-
-            <!-- Submission Form -->
-            <div
-              v-if="showSubmissionForm === collaboration.id"
-              class="space-y-4 p-4 bg-muted/50 rounded-lg">
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label for="candidateName">Candidate Name *</Label>
-                  <Input
-                    id="candidateName"
-                    v-model="submissionForm.candidateName"
-                    placeholder="John Doe"
-                    required />
-                </div>
-                <div>
-                  <Label for="candidateEmail">Candidate Email</Label>
-                  <Input
-                    id="candidateEmail"
-                    v-model="submissionForm.candidateEmail"
-                    type="email"
-                    placeholder="john@example.com" />
-                </div>
-              </div>
-
-              <div>
-                <Label for="notes">Notes</Label>
-                <Textarea
-                  id="notes"
-                  v-model="submissionForm.notes"
-                  placeholder="Additional information about the candidate..."
-                  rows="3" />
-              </div>
-
-              <div>
-                <Label for="cv">CV/Resume *</Label>
-                <Input
-                  id="cv"
-                  type="file"
-                  accept=".pdf,.doc,.docx"
-                  @change="handleFileUpload"
-                  required />
-                <p class="text-xs text-muted-foreground mt-1">
-                  Upload PDF, DOC, or DOCX files only
+                v-if="collaboration.status === 'REJECTED'"
+                class="px-3 py-2 bg-destructive/5 border-l-2 border-destructive text-sm">
+                <p class="text-destructive-foreground">
+                  {{
+                    collaboration.rejectionReason ||
+                    "The company declined your partnership request."
+                  }}
                 </p>
               </div>
 
-              <div class="flex items-center gap-4">
-                <Button
-                  @click="submitCandidate(collaboration.id)"
-                  :disabled="
-                    isSubmitting ||
-                    !submissionForm.candidateName ||
-                    !submissionForm.file
-                  ">
-                  {{ isSubmitting ? "Submitting..." : "Submit Candidate" }}
-                </Button>
-                <Button
-                  @click="cancelSubmission"
-                  variant="outline"
-                  type="button">
-                  Cancel
-                </Button>
-              </div>
-            </div>
+              <!-- Submission Section (only if approved) -->
+              <div
+                v-if="
+                  collaboration.status === 'APPROVED' &&
+                  collaboration.bounty.status === 'OPEN'
+                "
+                class="px-3 py-2 border-t border-border">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <span class="text-sm text-muted-foreground"
+                      >{{
+                        collaboration.submissions?.length || 0
+                      }}
+                      submissions</span
+                    >
+                    <Button
+                      @click="toggleSubmissionForm(collaboration.id)"
+                      variant="ghost"
+                      size="sm">
+                      {{
+                        showSubmissionForm === collaboration.id
+                          ? "Cancel"
+                          : "New Submission"
+                      }}
+                    </Button>
+                  </div>
+                </div>
 
-            <!-- Previous Submissions -->
-            <div v-if="collaboration.submissions?.length" class="mt-4">
-              <h5 class="text-sm font-medium mb-2">Previous Submissions</h5>
-              <div class="space-y-2">
+                <!-- Submission Form -->
                 <div
-                  v-for="submission in collaboration.submissions"
-                  :key="submission.id"
-                  class="flex items-center justify-between p-3 bg-muted/30 rounded">
+                  v-if="showSubmissionForm === collaboration.id"
+                  class="mt-4 space-y-4">
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label for="candidateName">Candidate Name *</Label>
+                      <Input
+                        id="candidateName"
+                        v-model="submissionForm.candidateName"
+                        placeholder="John Doe"
+                        required />
+                    </div>
+                    <div>
+                      <Label for="candidateEmail">Candidate Email</Label>
+                      <Input
+                        id="candidateEmail"
+                        v-model="submissionForm.candidateEmail"
+                        type="email"
+                        placeholder="john@example.com" />
+                    </div>
+                  </div>
+
                   <div>
-                    <p class="text-sm font-medium">
-                      {{ submission.candidateName }}
-                    </p>
-                    <p class="text-xs text-muted-foreground">
-                      Submitted {{ formatDate(submission.createdAt) }}
+                    <Label for="notes">Notes</Label>
+                    <Textarea
+                      id="notes"
+                      v-model="submissionForm.notes"
+                      placeholder="Additional information about the candidate..."
+                      rows="3" />
+                  </div>
+
+                  <div>
+                    <Label for="cv">CV/Resume *</Label>
+                    <Input
+                      id="cv"
+                      type="file"
+                      accept=".pdf,.doc,.docx"
+                      @change="handleFileUpload"
+                      required />
+                    <p class="text-xs text-muted-foreground mt-1">
+                      Upload PDF, DOC, or DOCX files only
                     </p>
                   </div>
-                  <Badge
-                    :variant="getSubmissionStatusVariant(submission.status)"
-                    class="text-xs">
-                    {{ submission.status }}
-                  </Badge>
+
+                  <div class="flex items-center gap-2">
+                    <Button
+                      @click="submitCandidate(collaboration.id)"
+                      size="sm"
+                      :disabled="
+                        isSubmitting ||
+                        !submissionForm.candidateName ||
+                        !submissionForm.file
+                      ">
+                      {{ isSubmitting ? "Submitting..." : "Submit" }}
+                    </Button>
+                  </div>
+                </div>
+
+                <!-- Previous Submissions -->
+                <div
+                  v-if="collaboration.submissions?.length"
+                  class="mt-2 space-y-1">
+                  <div
+                    v-for="submission in collaboration.submissions"
+                    :key="submission.id"
+                    class="flex items-center justify-between py-1 text-sm">
+                    <div class="flex items-center gap-2">
+                      <span class="font-medium">{{
+                        submission.candidateName
+                      }}</span>
+                      <span class="text-muted-foreground">·</span>
+                      <span class="text-xs text-muted-foreground">
+                        {{ formatDate(submission.createdAt) }}
+                      </span>
+                    </div>
+                    <Badge
+                      :variant="getSubmissionStatusVariant(submission.status)"
+                      class="text-xs">
+                      {{ submission.status }}
+                    </Badge>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
+          </li>
+        </ul>
       </div>
 
       <!-- Empty State -->
-      <div v-else class="text-center py-16">
-        <div
-          class="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-          <svg
-            class="w-8 h-8 text-muted-foreground"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24">
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m8 6V9a2 2 0 00-2-2H10a2 2 0 00-2 2v3.1M15 13l-3-3-3 3"></path>
-          </svg>
-        </div>
-        <h3 class="text-lg font-semibold mb-2">No bounty collaborations</h3>
-        <p class="text-muted-foreground mb-6">
-          You haven't expressed interest in any bounties yet. Start exploring
-          opportunities!
+      <div
+        v-else
+        class="flex flex-col items-center justify-center py-12 border border-dashed rounded-lg">
+        <svg
+          class="w-8 h-8 text-muted-foreground mb-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="1.5"
+            d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m8 6V9a2 2 0 00-2-2H10a2 2 0 00-2 2v3.1M15 13l-3-3-3 3"></path>
+        </svg>
+        <p class="text-sm text-muted-foreground mb-4">
+          No bounty collaborations yet
         </p>
         <NuxtLink to="/bounties">
-          <Button>Browse Bounties</Button>
+          <Button variant="outline" size="sm">Browse Bounties</Button>
         </NuxtLink>
       </div>
     </div>

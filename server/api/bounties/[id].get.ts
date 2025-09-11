@@ -1,15 +1,15 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
 export default defineEventHandler(async (event) => {
-  const id = getRouterParam(event, 'id')
-  
+  const id = getRouterParam(event, "id");
+
   if (!id) {
     throw createError({
       statusCode: 400,
-      statusMessage: 'Bounty ID is required'
-    })
+      statusMessage: "Bounty ID is required",
+    });
   }
 
   try {
@@ -21,8 +21,8 @@ export default defineEventHandler(async (event) => {
             id: true,
             companyName: true,
             description: true,
-            website: true
-          }
+            website: true,
+          },
         },
         collaborations: {
           include: {
@@ -32,48 +32,63 @@ export default defineEventHandler(async (event) => {
                   select: {
                     id: true,
                     name: true,
-                    email: true
-                  }
-                }
-              }
-            }
-          }
+                    email: true,
+                  },
+                },
+              },
+            },
+          },
         },
         notes: {
           include: {
             user: {
               select: {
                 id: true,
-                name: true
-              }
-            }
+                name: true,
+              },
+            },
           },
           orderBy: {
-            createdAt: 'desc'
-          }
+            createdAt: "desc",
+          },
         },
         _count: {
           select: {
             collaborations: true,
-            submissions: true
-          }
-        }
-      }
-    })
+            submissions: true,
+          },
+        },
+      },
+    });
 
     if (!bounty) {
       throw createError({
         statusCode: 404,
-        statusMessage: 'Bounty not found'
-      })
+        statusMessage: "Bounty not found",
+      });
     }
 
-    return bounty
+    bounty.collaborations = bounty.collaborations.map((collaboration) => ({
+      ...collaboration,
+      recruiter: {
+        ...collaboration.recruiter,
+        user: {
+          ...collaboration.recruiter.user,
+          name: collaboration.recruiter.user.name
+            .split(" ")
+            .map((n) => n[0])
+            .join("")
+            .toUpperCase(),
+        },
+      },
+    }));
+
+    return bounty;
   } catch (error) {
-    console.error('Error fetching bounty:', error)
+    console.error("Error fetching bounty:", error);
     throw createError({
       statusCode: 500,
-      statusMessage: 'Failed to fetch bounty'
-    })
+      statusMessage: "Failed to fetch bounty",
+    });
   }
-})
+});
