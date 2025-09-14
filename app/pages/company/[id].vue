@@ -194,6 +194,8 @@
 </template>
 
 <script lang="ts" setup>
+import { useCompanyQuery } from "@/composables/useCompanyQuery";
+
 const route = useRoute();
 const companyId = route.params.id as string;
 
@@ -201,25 +203,18 @@ const companyId = route.params.id as string;
 const statusFilter = ref("all");
 const sortBy = ref("newest");
 
-// Fetch company data
-const {
-  data: company,
-  pending,
-  error,
-} = await useFetch(`/api/companies/${companyId}`, {
-  server: false,
-});
+const { data: company, isPending: pending, error } = useCompanyQuery(companyId);
 
 // Computed properties
 const openBounties = computed(
-  () => company.value?.bounties.filter((b) => b.status === "OPEN") || []
+  () => company.value?.bounties.filter((b: any) => b.status === "OPEN") || []
 );
 
 const totalBountyValue = computed(() => {
   if (!company.value?.bounties) return 0;
   return company.value.bounties
-    .filter((b) => b.payoutType === "CASH")
-    .reduce((sum, b) => sum + (b.payoutAmount || 0), 0);
+    .filter((b: any) => b.payoutType === "CASH")
+    .reduce((sum: number, b: any) => sum + (b.payoutAmount || 0), 0);
 });
 
 const filteredBounties = computed(() => {
@@ -229,25 +224,25 @@ const filteredBounties = computed(() => {
 
   // Filter by status
   if (statusFilter.value !== "all") {
-    filtered = filtered.filter((b) => b.status === statusFilter.value);
+    filtered = filtered.filter((b: any) => b.status === statusFilter.value);
   }
 
   // Sort
   switch (sortBy.value) {
     case "newest":
       filtered.sort(
-        (a, b) =>
+        (a: any, b: any) =>
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
       break;
     case "oldest":
       filtered.sort(
-        (a, b) =>
+        (a: any, b: any) =>
           new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
       );
       break;
     case "payout-high":
-      filtered.sort((a, b) => {
+      filtered.sort((a: any, b: any) => {
         const aValue =
           a.payoutType === "CASH"
             ? a.payoutAmount || 0
@@ -260,7 +255,7 @@ const filteredBounties = computed(() => {
       });
       break;
     case "deadline":
-      filtered.sort((a, b) => {
+      filtered.sort((a: any, b: any) => {
         if (!a.deadline && !b.deadline) return 0;
         if (!a.deadline) return 1;
         if (!b.deadline) return -1;

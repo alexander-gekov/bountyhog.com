@@ -274,28 +274,26 @@
 </template>
 
 <script lang="ts" setup>
-// Fetch bounties data for showcasing
-const { data: bounties, pending } = await useFetch("/api/bounties", {
-  server: false,
-  default: () => [],
-});
+import { useBountiesQuery } from "@/composables/useBountiesQuery";
+
+const { data: bounties, isPending: pending } = useBountiesQuery();
 
 // Computed values for stats and featured bounties
 const featuredBounties = computed(() => {
-  if (!bounties.value) return [];
-  return bounties.value
+  if (!bounties.value?.bounties) return [];
+  return bounties.value.bounties
     .sort(
-      (a, b) =>
+      (a: any, b: any) =>
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     )
     .slice(0, 3);
 });
 
-const totalBounties = computed(() => bounties.value?.length || 0);
+const totalBounties = computed(() => bounties.value?.bounties?.length || 0);
 
 const totalPayout = computed(() => {
-  if (!bounties.value) return 0;
-  return bounties.value.reduce((total, bounty) => {
+  if (!bounties.value?.bounties) return 0;
+  return bounties.value.bounties.reduce((total: number, bounty: any) => {
     if (bounty.payoutType === "CASH" && bounty.payoutAmount) {
       return total + bounty.payoutAmount;
     }
@@ -309,9 +307,9 @@ const totalPayout = computed(() => {
 });
 
 const totalRecruiters = computed(() => {
-  if (!bounties.value) return 0;
+  if (!bounties.value?.bounties) return 0;
   const uniqueRecruiters = new Set();
-  bounties.value.forEach((bounty) => {
+  bounties.value.bounties.forEach((bounty: any) => {
     if (bounty._count?.collaborations) {
       // This is a rough estimate - in reality you'd count unique recruiters
       for (let i = 0; i < bounty._count.collaborations; i++) {

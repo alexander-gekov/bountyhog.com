@@ -76,23 +76,23 @@
 
 <script lang="ts" setup>
 import { LucideBell } from "lucide-vue-next";
+import { useQueryClient } from "@tanstack/vue-query";
+import { useNotificationsQuery } from "@/composables/useNotificationsQuery";
 
-// Fetch notifications
-const { data: notifications, refresh } = await useFetch("/api/notifications", {
-  server: false,
-  default: () => [],
-});
+const queryClient = useQueryClient();
+
+const { data: notifications } = useNotificationsQuery();
 
 // Computed properties
 const unreadCount = computed(
-  () => notifications.value?.filter((n) => !n.isRead).length || 0
+  () => notifications.value?.filter((n: any) => !n.isRead).length || 0
 );
 
 // Functions
 const markAllAsRead = async () => {
   try {
     await $fetch("/api/notifications/mark-all-read", { method: "POST" });
-    await refresh();
+    await queryClient.invalidateQueries({ queryKey: ["notifications"] });
   } catch (error) {
     console.error("Failed to mark notifications as read:", error);
   }
@@ -105,7 +105,7 @@ const handleNotificationClick = async (notification: any) => {
       await $fetch(`/api/notifications/${notification.id}/read`, {
         method: "POST",
       });
-      await refresh();
+      await queryClient.invalidateQueries({ queryKey: ["notifications"] });
     } catch (error) {
       console.error("Failed to mark notification as read:", error);
     }
@@ -157,14 +157,4 @@ const formatDate = (dateString: string) => {
     return date.toLocaleDateString();
   }
 };
-
-// Auto-refresh notifications every 30 seconds
-const refreshInterval = setInterval(() => {
-  refresh();
-}, 30000);
-
-// Cleanup on unmount
-onUnmounted(() => {
-  clearInterval(refreshInterval);
-});
 </script>

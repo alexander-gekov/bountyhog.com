@@ -319,15 +319,16 @@
 
 <script lang="ts" setup>
 import { authClient } from "@/lib/auth-client";
+import { useQueryClient } from "@tanstack/vue-query";
+import { useUserCompanyQuery } from "@/composables/useUserCompanyQuery";
 
 // Auth check
 const session = authClient.useSession();
+const queryClient = useQueryClient();
 
-// Fetch user's company if they have one
-const { data: userCompany } = await useFetch("/api/user/company", {
-  server: false,
-  default: () => null,
-});
+const enabled = computed(() => !!session.value?.data);
+
+const { data: userCompany } = useUserCompanyQuery(enabled);
 
 // Form state
 const isSubmitting = ref(false);
@@ -370,20 +371,6 @@ const isFormValid = computed(() => {
       : form.value.payoutPercentage && form.value.payoutPercentage > 0;
 
   const companyValid = userCompany.value || form.value.companyName;
-
-  console.log("Form Validation Debug:", {
-    basicValid,
-    title: form.value.title,
-    description: form.value.description,
-    guaranteeTimeframe: form.value.guaranteeTimeframe,
-    payoutType: form.value.payoutType,
-    payoutValid,
-    payoutAmount: form.value.payoutAmount,
-    payoutPercentage: form.value.payoutPercentage,
-    companyValid,
-    userCompany: userCompany.value,
-    companyName: form.value.companyName,
-  });
 
   return basicValid && payoutValid && companyValid;
 });
@@ -484,6 +471,10 @@ const submitBounty = async () => {
       method: "POST",
       body: formData,
     });
+
+    // Invalidate queries to refetch data
+    await queryClient.invalidateQueries({ queryKey: ["bounties"] });
+    await queryClient.invalidateQueries({ queryKey: ["user-bounties"] });
 
     // Redirect to the newly created bounty
     await navigateTo(`/company/bounty/${response.id}`);

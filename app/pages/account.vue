@@ -419,30 +419,25 @@
 
 <script lang="ts" setup>
 import { authClient } from "@/lib/auth-client";
+import { useQueryClient } from "@tanstack/vue-query";
+import { useUserCompanyQuery } from "@/composables/useUserCompanyQuery";
+import { useUserRecruiterQuery } from "@/composables/useUserRecruiterQuery";
+import { useUserCompanyStatsQuery } from "@/composables/useUserCompanyStatsQuery";
+import { useUserRecruiterStatsQuery } from "@/composables/useUserRecruiterStatsQuery";
+import { useUserActivitiesQuery } from "@/composables/useUserActivitiesQuery";
 
 // Auth check - use the reactive session
 const session = authClient.useSession();
+const queryClient = useQueryClient();
+
+const enabled = computed(() => !!session.value?.data);
 
 // Fetch additional data based on user type
-const { data: company } = await useFetch("/api/user/company", {
-  default: () => null,
-});
-
-const { data: recruiter } = await useFetch("/api/user/recruiter", {
-  default: () => null,
-});
-
-const { data: companyStats } = await useFetch("/api/user/company-stats", {
-  default: () => null,
-});
-
-const { data: recruiterStats } = await useFetch("/api/user/recruiter-stats", {
-  default: () => null,
-});
-
-const { data: activities } = await useFetch("/api/user/activities", {
-  default: () => [],
-});
+const { data: company } = useUserCompanyQuery(enabled);
+const { data: recruiter } = useUserRecruiterQuery(enabled);
+const { data: companyStats } = useUserCompanyStatsQuery(enabled);
+const { data: recruiterStats } = useUserRecruiterStatsQuery(enabled);
+const { data: activities } = useUserActivitiesQuery(enabled);
 
 // Bio editing state
 const isEditingBio = ref(false);
@@ -475,10 +470,7 @@ const saveBio = async () => {
       },
     });
 
-    // Update the local data
-    if (recruiter.value) {
-      recruiter.value.bio = bioForm.value.bio;
-    }
+    await queryClient.invalidateQueries({ queryKey: ["user-recruiter"] });
 
     isEditingBio.value = false;
   } catch (error) {

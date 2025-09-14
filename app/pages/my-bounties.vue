@@ -502,19 +502,16 @@
 
 <script lang="ts" setup>
 import { authClient } from "@/lib/auth-client";
+import { useQueryClient } from "@tanstack/vue-query";
+import { useUserBountiesQuery } from "@/composables/useUserBountiesQuery";
 
 // Auth check
 const session = authClient.useSession();
+const queryClient = useQueryClient();
 
-// Fetch user bounties (both applied and posted)
-const {
-  data: bountyData,
-  pending,
-  refresh,
-} = await useFetch("/api/user/bounties", {
-  server: false,
-  default: () => ({ userType: null, appliedBounties: [], postedBounties: [] }),
-});
+const enabled = computed(() => !!session.value?.data);
+
+const { data: bountyData, isPending: pending } = useUserBountiesQuery(enabled);
 
 // Extract data
 const appliedBounties = computed(() => bountyData.value?.appliedBounties || []);
@@ -525,17 +522,17 @@ const activeTab = ref("applied");
 
 // Computed stats for applied bounties (recruiter perspective)
 const unlockedCollaborations = computed(
-  () => appliedBounties.value?.filter((c) => c.status === "APPROVED") || []
+  () => appliedBounties.value?.filter((c: any) => c.status === "APPROVED") || []
 );
 
 const pendingCollaborations = computed(
-  () => appliedBounties.value?.filter((c) => c.status === "PENDING") || []
+  () => appliedBounties.value?.filter((c: any) => c.status === "PENDING") || []
 );
 
 const totalSubmissions = computed(
   () =>
     appliedBounties.value?.reduce(
-      (sum, c) => sum + (c.submissions?.length || 0),
+      (sum: number, c: any) => sum + (c.submissions?.length || 0),
       0
     ) || 0
 );
@@ -544,7 +541,7 @@ const totalSubmissions = computed(
 const totalPartnershipRequests = computed(
   () =>
     postedBounties.value?.reduce(
-      (sum, b) => sum + (b.collaborations?.length || 0),
+      (sum: number, b: any) => sum + (b.collaborations?.length || 0),
       0
     ) || 0
 );
@@ -552,7 +549,7 @@ const totalPartnershipRequests = computed(
 const pendingPartnershipRequests = computed(
   () =>
     postedBounties.value?.reduce(
-      (sum, b) =>
+      (sum: number, b: any) =>
         sum +
         (b.collaborations?.filter((c: any) => c.status === "PENDING").length ||
           0),
@@ -563,7 +560,7 @@ const pendingPartnershipRequests = computed(
 const totalCandidateSubmissions = computed(
   () =>
     postedBounties.value?.reduce(
-      (sum, b) => sum + (b.submissions?.length || 0),
+      (sum: number, b: any) => sum + (b.submissions?.length || 0),
       0
     ) || 0
 );
@@ -682,7 +679,7 @@ const handleSubmissionFormSubmit = async (payload: {
     });
 
     showSubmissionForm.value = null;
-    await refresh();
+    await queryClient.invalidateQueries({ queryKey: ["user-bounties"] });
   } catch (error) {
     console.error("Failed to submit candidate:", error);
   } finally {
@@ -699,7 +696,7 @@ const approvePartnership = async (collaborationId: string) => {
         method: "POST",
       }
     );
-    await refresh();
+    await queryClient.invalidateQueries({ queryKey: ["user-bounties"] });
   } catch (error) {
     console.error("Failed to approve partnership:", error);
   }
@@ -713,7 +710,7 @@ const rejectPartnership = async (collaborationId: string) => {
         method: "POST",
       }
     );
-    await refresh();
+    await queryClient.invalidateQueries({ queryKey: ["user-bounties"] });
   } catch (error) {
     console.error("Failed to reject partnership:", error);
   }
@@ -726,7 +723,7 @@ const reviewSubmission = async (submissionId: string, status: string) => {
       method: "POST",
       body: { status },
     });
-    await refresh();
+    await queryClient.invalidateQueries({ queryKey: ["user-bounties"] });
   } catch (error) {
     console.error("Failed to review submission:", error);
   }

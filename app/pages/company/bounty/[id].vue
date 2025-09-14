@@ -440,23 +440,18 @@
 
 <script lang="ts" setup>
 import { authClient } from "@/lib/auth-client";
+import { useQueryClient } from "@tanstack/vue-query";
+import { useBountyQuery } from "@/composables/useBountyQuery";
 
 const route = useRoute();
 const bountyId = route.params.id as string;
+const queryClient = useQueryClient();
 
 // Get current user
 const session = authClient.useSession();
 const user = computed(() => session.value?.data?.user);
 
-// Fetch bounty data
-const {
-  data: bounty,
-  pending,
-  error,
-  refresh,
-} = await useFetch(`/api/bounties/${bountyId}`, {
-  server: false,
-});
+const { data: bounty, isPending: pending, error } = useBountyQuery(bountyId);
 
 // Parse requirements
 const requirements = computed(() => {
@@ -472,7 +467,7 @@ const requirements = computed(() => {
 const collaboration = computed(() => {
   if (!user.value || !bounty.value?.collaborations) return null;
   return bounty.value.collaborations.find(
-    (c) => c.recruiter.userId === user.value?.id
+    (c: any) => c.recruiter.userId === user.value?.id
   );
 });
 
@@ -501,7 +496,7 @@ const expressInterest = async () => {
     });
     showInterestForm.value = false;
     introductionText.value = "";
-    await refresh();
+    await queryClient.invalidateQueries({ queryKey: ["bounty", bountyId] });
   } catch (error) {
     console.error("Failed to express interest:", error);
   } finally {
@@ -527,7 +522,7 @@ const submitNote = async () => {
       },
     });
     newNote.value = "";
-    await refresh();
+    await queryClient.invalidateQueries({ queryKey: ["bounty", bountyId] });
   } catch (error) {
     console.error("Failed to submit note:", error);
   }
@@ -564,7 +559,7 @@ const handleCandidateSubmission = async (payload: {
     });
 
     showSubmissionForm.value = false;
-    await refresh();
+    await queryClient.invalidateQueries({ queryKey: ["bounty", bountyId] });
   } catch (error) {
     console.error("Failed to submit candidate:", error);
   } finally {

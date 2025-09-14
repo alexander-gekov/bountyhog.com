@@ -66,8 +66,8 @@
         </ul>
 
         <!-- Load More Button -->
-        <div v-if="hasMoreItems" class="flex justify-center mt-6">
-          <Button @click="loadMore" variant="outline"> Load More </Button>
+        <div v-if="hasNextPage" class="flex justify-center mt-6">
+          <Button @click="fetchNextPage" variant="outline"> Load More </Button>
         </div>
       </div>
 
@@ -101,28 +101,35 @@
 </template>
 
 <script lang="ts" setup>
+import { onMounted } from "vue";
+import { useInfiniteBountiesQuery } from "@/composables/useInfiniteBountiesQuery";
+
 const sortBy = ref("newest");
 const selectedTechFilters = ref<string[]>([]);
-const currentPage = ref(1);
-const itemsPerPage = 25;
 
-// Fetch bounties data
-const {
-  data: bounties,
-  pending,
-  refresh: refreshBounties,
-} = await useFetch("/api/bounties", {
-  server: false,
-  default: () => [],
+const { 
+  data: bountiesData, 
+  isPending: pending, 
+  fetchNextPage, 
+  hasNextPage, 
+  prefetchBounties 
+} = useInfiniteBountiesQuery();
+
+onMounted(() => {
+  prefetchBounties();
+});
+
+const allBounties = computed(() => {
+  return bountiesData.value?.pages.flatMap(page => page.bounties) || [];
 });
 
 // Extract technologies from requirements
 const techFilters = computed(() => {
-  if (!bounties.value) return [];
+  if (!allBounties.value) return [];
 
   const techCount = new Map<string, number>();
 
-  bounties.value.forEach((bounty) => {
+  allBounties.value.forEach((bounty: any) => {
     try {
       const requirements = JSON.parse(bounty.requirements) || [];
       requirements.forEach((tech: string) => {
@@ -150,14 +157,14 @@ const toggleTechFilter = (tech: string) => {
 };
 
 // Computed filtered and sorted bounties (all results)
-const allFilteredBounties = computed(() => {
-  if (!bounties.value) return [];
+const filteredBounties = computed(() => {
+  if (!allBounties.value) return [];
 
-  let filtered = [...bounties.value];
+  let filtered = [...allBounties.value];
 
   // Apply tech filters
   if (selectedTechFilters.value.length > 0) {
-    filtered = filtered.filter((bounty) => {
+    filtered = filtered.filter((bounty: any) => {
       try {
         const requirements = JSON.parse(bounty.requirements) || [];
         return selectedTechFilters.value.some((tech) =>
@@ -173,16 +180,16 @@ const allFilteredBounties = computed(() => {
   switch (sortBy.value) {
     case "newest":
       return filtered.sort(
-        (a, b) =>
+        (a: any, b: any) =>
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
     case "oldest":
       return filtered.sort(
-        (a, b) =>
+        (a: any, b: any) =>
           new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
       );
     case "payout-high":
-      return filtered.sort((a, b) => {
+      return filtered.sort((a: any, b: any) => {
         const aValue =
           a.payoutType === "CASH"
             ? a.payoutAmount || 0
@@ -194,7 +201,7 @@ const allFilteredBounties = computed(() => {
         return bValue - aValue;
       });
     case "payout-low":
-      return filtered.sort((a, b) => {
+      return filtered.sort((a: any, b: any) => {
         const aValue =
           a.payoutType === "CASH"
             ? a.payoutAmount || 0
@@ -206,7 +213,7 @@ const allFilteredBounties = computed(() => {
         return aValue - bValue;
       });
     case "deadline":
-      return filtered.sort((a, b) => {
+      return filtered.sort((a: any, b: any) => {
         if (!a.deadline && !b.deadline) return 0;
         if (!a.deadline) return 1;
         if (!b.deadline) return -1;
@@ -217,26 +224,6 @@ const allFilteredBounties = computed(() => {
   }
 });
 
-// Paginated bounties (visible results)
-const filteredBounties = computed(() => {
-  const endIndex = currentPage.value * itemsPerPage;
-  return allFilteredBounties.value.slice(0, endIndex);
-});
-
-// Check if there are more items to load
-const hasMoreItems = computed(() => {
-  return allFilteredBounties.value.length > currentPage.value * itemsPerPage;
-});
-
-// Load more function
-const loadMore = () => {
-  currentPage.value += 1;
-};
-
-// Reset pagination when filters change
-watch([sortBy, selectedTechFilters], () => {
-  currentPage.value = 1;
-});
 </script>
 
 <style scoped>
