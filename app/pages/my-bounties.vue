@@ -266,7 +266,7 @@
                       id: collaboration.bounty.id,
                       title: collaboration.bounty.title,
                       requirements: collaboration.bounty.requirements,
-                      guidelines: collaboration.bounty.guidelines
+                      guidelines: collaboration.bounty.guidelines,
                     }"
                     :collaboration-id="collaboration.id"
                     :is-submitting="isSubmitting"
@@ -663,7 +663,7 @@ const handleSubmissionFormSubmit = async (payload: {
   collaborationId?: string;
 }) => {
   const { form, collaborationId } = payload;
-  
+
   if (!form.candidateName || !form.file || !collaborationId) return;
 
   isSubmitting.value = true;

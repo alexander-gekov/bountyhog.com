@@ -330,14 +330,14 @@
                   </p>
                 </div>
                 <div class="space-y-3">
-                  <Button 
-                    class="w-full" 
+                  <Button
+                    class="w-full"
                     @click="showSubmissionForm = !showSubmissionForm">
-                    {{ showSubmissionForm ? 'Hide Form' : 'Submit Candidate' }}
+                    {{ showSubmissionForm ? "Hide Form" : "Submit Candidate" }}
                   </Button>
-                  <Button 
-                    class="w-full" 
-                    variant="outline" 
+                  <Button
+                    class="w-full"
+                    variant="outline"
                     @click="navigateTo('/my-bounties')">
                     Go to My Bounties
                   </Button>
@@ -364,12 +364,16 @@
             bounty?.status === 'OPEN'
           ">
           <CandidateSubmissionForm
-            :bounty="bounty ? {
-              id: bounty.id,
-              title: bounty.title,
-              requirements: bounty.requirements,
-              guidelines: bounty.guidelines
-            } : undefined"
+            :bounty="
+              bounty
+                ? {
+                    id: bounty.id,
+                    title: bounty.title,
+                    requirements: bounty.requirements,
+                    guidelines: bounty.guidelines,
+                  }
+                : undefined
+            "
             :collaboration-id="collaboration?.id"
             :is-submitting="isSubmittingCandidate"
             :show-cancel="true"
@@ -541,7 +545,7 @@ const handleCandidateSubmission = async (payload: {
   collaborationId?: string;
 }) => {
   const { form, collaborationId } = payload;
-  
+
   if (!form.candidateName || !form.file || !collaborationId) return;
 
   isSubmittingCandidate.value = true;

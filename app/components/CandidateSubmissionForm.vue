@@ -33,7 +33,7 @@
               </Label>
               <Input
                 id="candidateName"
-                v-model="form.candidateName"
+                v-model:model-value="form.candidateName"
                 placeholder="John Doe"
                 required
                 class="h-10" />
@@ -44,7 +44,7 @@
               </Label>
               <Input
                 id="candidateEmail"
-                v-model="form.candidateEmail"
+                v-model:model-value="form.candidateEmail"
                 type="email"
                 placeholder="john@example.com"
                 class="h-10" />
@@ -63,7 +63,7 @@
             </Label>
             <Textarea
               id="notes"
-              v-model="form.notes"
+              v-model:model-value="form.notes"
               placeholder="Why is this candidate a great fit? Include relevant experience, skills, or achievements..."
               rows="4"
               class="resize-none" />
@@ -144,10 +144,12 @@
                 d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.996-.833-2.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
             </svg>
             <div class="space-y-2">
-              <h4 class="text-sm font-medium text-amber-800 dark:text-amber-200">
+              <h4
+                class="text-sm font-medium text-amber-800 dark:text-amber-200">
                 Submission Guidelines
               </h4>
-              <p class="text-sm text-amber-700 dark:text-amber-300 leading-relaxed">
+              <p
+                class="text-sm text-amber-700 dark:text-amber-300 leading-relaxed">
                 {{ bounty.guidelines }}
               </p>
             </div>
@@ -159,7 +161,7 @@
           <div class="flex items-start space-x-3 p-4 bg-muted/30 rounded-lg">
             <Checkbox
               id="compliance"
-              v-model:checked="form.acknowledgeCompliance"
+              v-model:model-value="form.acknowledgeCompliance"
               class="mt-1" />
             <div class="space-y-1">
               <Label
@@ -169,8 +171,8 @@
               </Label>
               <p class="text-xs text-muted-foreground leading-relaxed">
                 I understand that if I send candidates that strictly don't match
-                the guidelines set by the author I risk losing approval to submit
-                more candidates.
+                the guidelines set by the author I risk losing approval to
+                submit more candidates.
               </p>
             </div>
           </div>
@@ -215,57 +217,60 @@
 
 <script lang="ts" setup>
 interface Bounty {
-  id: string
-  title: string
-  requirements?: string | null
-  guidelines?: string | null
+  id: string;
+  title: string;
+  requirements?: string | null;
+  guidelines?: string | null;
 }
 
 interface SubmissionForm {
-  candidateName: string
-  candidateEmail: string
-  notes: string
-  file: File | null
-  acknowledgeCompliance: boolean
+  candidateName: string;
+  candidateEmail: string;
+  notes: string;
+  file: File | null;
+  acknowledgeCompliance: boolean;
 }
 
 interface Props {
-  bounty?: Bounty
-  collaborationId?: string
-  isSubmitting?: boolean
-  showCancel?: boolean
+  bounty?: Bounty;
+  collaborationId?: string;
+  isSubmitting?: boolean;
+  showCancel?: boolean;
 }
 
 interface Emits {
-  (e: 'submit', payload: { form: SubmissionForm; collaborationId?: string }): void
-  (e: 'cancel'): void
+  (
+    e: "submit",
+    payload: { form: SubmissionForm; collaborationId?: string }
+  ): void;
+  (e: "cancel"): void;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   isSubmitting: false,
-  showCancel: true
-})
+  showCancel: true,
+});
 
-const emit = defineEmits<Emits>()
+const emit = defineEmits<Emits>();
 
 // Form state
 const form = ref<SubmissionForm>({
-  candidateName: '',
-  candidateEmail: '',
-  notes: '',
+  candidateName: "",
+  candidateEmail: "",
+  notes: "",
   file: null,
-  acknowledgeCompliance: false
-})
+  acknowledgeCompliance: false,
+});
 
 // Parse requirements
 const parsedRequirements = computed(() => {
-  if (!props.bounty?.requirements) return []
+  if (!props.bounty?.requirements) return [];
   try {
-    return JSON.parse(props.bounty.requirements)
+    return JSON.parse(props.bounty.requirements);
   } catch {
-    return []
+    return [];
   }
-})
+});
 
 // Form validation
 const isFormValid = computed(() => {
@@ -273,61 +278,61 @@ const isFormValid = computed(() => {
     form.value.candidateName.trim() &&
     form.value.file &&
     form.value.acknowledgeCompliance
-  )
-})
+  );
+});
 
 // File upload handler
 const handleFileUpload = (event: Event) => {
-  const target = event.target as HTMLInputElement
+  const target = event.target as HTMLInputElement;
   if (target.files && target.files[0]) {
-    const file = target.files[0]
+    const file = target.files[0];
     // Validate file size (10MB max)
     if (file.size > 10 * 1024 * 1024) {
       // Reset the input
-      target.value = ''
+      target.value = "";
       // You might want to show a toast notification here
-      console.error('File size must be less than 10MB')
-      return
+      console.error("File size must be less than 10MB");
+      return;
     }
-    form.value.file = file
+    form.value.file = file;
   }
-}
+};
 
 // Submit handler
 const onSubmit = () => {
-  if (!isFormValid.value) return
-  
-  emit('submit', {
+  if (!isFormValid.value) return;
+
+  emit("submit", {
     form: form.value,
-    collaborationId: props.collaborationId
-  })
-}
+    collaborationId: props.collaborationId,
+  });
+};
 
 // Cancel handler
 const onCancel = () => {
-  resetForm()
-  emit('cancel')
-}
+  resetForm();
+  emit("cancel");
+};
 
 // Reset form
 const resetForm = () => {
   form.value = {
-    candidateName: '',
-    candidateEmail: '',
-    notes: '',
+    candidateName: "",
+    candidateEmail: "",
+    notes: "",
     file: null,
-    acknowledgeCompliance: false
-  }
-  
+    acknowledgeCompliance: false,
+  };
+
   // Reset file input
-  const fileInput = document.getElementById('cv') as HTMLInputElement
+  const fileInput = document.getElementById("cv") as HTMLInputElement;
   if (fileInput) {
-    fileInput.value = ''
+    fileInput.value = "";
   }
-}
+};
 
 // Expose resetForm for parent components
 defineExpose({
-  resetForm
-})
+  resetForm,
+});
 </script>
