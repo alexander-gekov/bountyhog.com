@@ -31,6 +31,7 @@ model User {
   recruiter     Recruiter?
   bountyNotes   BountyNote[]
   notifications Notification[]
+  chatMessages  ChatMessage[]
 
   @@unique([email])
   @@map("user")
@@ -181,9 +182,29 @@ model RecruiterCollaboration {
   submissions   Submission[] // Submissions made through this collaboration
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
-  
+  chat          Chat?
+
   @@unique([bountyId, recruiterId])
   @@map("recruiter_collaboration")
+}
+
+model Chat {
+  id              String    @id @default(cuid())
+  collaboration   RecruiterCollaboration @relation(fields: [collaborationId], references: [id])
+  collaborationId String    @unique
+  messages        ChatMessage[]
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  chat      Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  chatId    String
+  sender    User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  senderId  String
+  message   String
+  createdAt DateTime @default(now())
 }
 
 model BountyNote {

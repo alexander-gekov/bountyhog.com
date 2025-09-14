@@ -1,11 +1,34 @@
 <template>
+  <!-- Simple fallback pattern background -->
+  <div
+    class="fixed inset-0 -z-10 bg-stone-50 dark:bg-stone-950"
+    style="
+      background-image: radial-gradient(
+        circle,
+        rgba(0, 0, 0, 0.15) 1px,
+        transparent 1px
+      );
+      background-size: 20px 20px;
+    "></div>
+
+  <!-- Dark mode pattern overlay -->
+  <div
+    class="fixed inset-0 -z-10 hidden dark:block"
+    style="
+      background-image: radial-gradient(
+        circle,
+        rgba(255, 255, 255, 0.08) 1px,
+        transparent 1px
+      );
+      background-size: 20px 20px;
+    "></div>
+
   <PatternBackground
-    class="absolutemin-h-screen"
-    :variant="PATTERN_BACKGROUND_VARIANT.Dot"
+    class="fixed inset-0 -z-10 opacity-30"
+    :variant="PATTERN_BACKGROUND_VARIANT.Grid"
     :animate="true"
     :direction="PATTERN_BACKGROUND_DIRECTION.Bottom"
-    size="sm"
-    :mask="PATTERN_BACKGROUND_MASK.Ellipse" />
+    size="lg" />
   <!-- Navigation -->
   <header class="border-b">
     <div class="container mx-auto px-4 py-4">

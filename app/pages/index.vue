@@ -1,6 +1,5 @@
 <template>
-  <div
-    class="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+  <div class="min-h-screen relative">
     <!-- Hero Section -->
     <div class="container mx-auto px-4 py-16">
       <div class="text-center max-w-4xl mx-auto">
