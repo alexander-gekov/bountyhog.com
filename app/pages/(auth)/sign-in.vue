@@ -42,9 +42,20 @@
           <Button
             type="submit"
             :disabled="isLoading"
-            class="w-full !mt-6"
+            :variant="lastMethod === 'email' ? 'default' : 'outline'"
+            class="w-full !mt-6 relative"
             size="lg">
-            <span v-if="!isLoading">Sign In</span>
+            <span
+              v-if="!isLoading"
+              class="flex items-center justify-center gap-2">
+              Sign In
+              <Badge
+                v-if="lastMethod === 'email'"
+                variant="secondary"
+                class="text-xs absolute right-0 -top-4">
+                Last used
+              </Badge>
+            </span>
             <span v-else class="flex items-center">
               <svg
                 class="animate-spin -ml-1 mr-3 h-5 w-5"
@@ -66,6 +77,40 @@
               Signing in...
             </span>
           </Button>
+
+          <div class="relative">
+            <div class="text-center text-sm">
+              <p class="text-muted-foreground">Or sign in with</p>
+            </div>
+
+            <!-- OAuth Providers (Google) -->
+            <Button
+              type="button"
+              @click="handleSignInWithGoogle"
+              :variant="lastMethod === 'google' ? 'default' : 'outline'"
+              class="w-full !mt-6 relative"
+              size="lg">
+              <span class="flex items-center justify-center gap-2">
+                Sign in with Google
+                <Badge
+                  v-if="lastMethod === 'google'"
+                  variant="secondary"
+                  class="text-xs absolute right-0 -top-4">
+                  Last used
+                </Badge>
+              </span>
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+                class="ml-2">
+                <path
+                  fill="currentColor"
+                  d="M11.99 13.9v-3.72h9.36c.14.63.25 1.22.25 2.05c0 5.71-3.83 9.77-9.6 9.77c-5.52 0-10-4.48-10-10S6.48 2 12 2c2.7 0 4.96.99 6.69 2.61l-2.84 2.76c-.72-.68-1.98-1.48-3.85-1.48c-3.31 0-6.01 2.75-6.01 6.12s2.7 6.12 6.01 6.12c3.83 0 5.24-2.65 5.5-4.22h-5.51z" />
+              </svg>
+            </Button>
+          </div>
 
           <div class="text-center text-sm">
             <p class="text-muted-foreground">
@@ -135,6 +180,14 @@ const formData = ref<SignInFormData>({
 
 const isLoading = ref(false);
 const error = ref("");
+
+const lastMethod = authClient.getLastUsedLoginMethod();
+
+const handleSignInWithGoogle = async () => {
+  await authClient.signIn.social({
+    provider: "google",
+  });
+};
 
 const handleSignIn = async () => {
   if (isLoading.value) return;

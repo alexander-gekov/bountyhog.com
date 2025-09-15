@@ -2,42 +2,57 @@
   <div class="min-h-screen relative">
     <!-- Hero Section -->
     <div class="container mx-auto px-4 py-16">
-      <div class="text-center max-w-4xl mx-auto">
-        <div
-          class="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium mb-6">
-          <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-          Live bounties • Active deals happening now
+      <div
+        class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
+        <!-- Left Column - Content -->
+        <div class="text-center lg:text-left">
+          <div
+            class="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium mb-6">
+            <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+            Live bounties • Active deals happening now
+          </div>
+
+          <h1
+            class="text-5xl md:text-6xl font-bold tracking-tight text-foreground mb-6">
+            Turn Your Network Into
+            <span
+              class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-600">
+              Income
+            </span>
+          </h1>
+
+          <p class="text-xl text-muted-foreground mb-8 leading-relaxed">
+            Connect top talent with dream jobs. Earn substantial rewards for
+            successful placements. Join the marketplace where recruitment meets
+            opportunity.
+          </p>
+
+          <div
+            class="flex items-center justify-center lg:justify-start gap-4 mb-12">
+            <NuxtLink to="/bounties">
+              <Button size="lg" class="px-8 py-4 text-lg">
+                Browse Active Bounties
+              </Button>
+            </NuxtLink>
+            <NuxtLink to="/create">
+              <Button variant="outline" size="lg" class="px-8 py-4 text-lg">
+                Post a Bounty
+              </Button>
+            </NuxtLink>
+          </div>
         </div>
 
-        <h1
-          class="text-5xl md:text-6xl font-bold tracking-tight text-foreground mb-6">
-          Turn Your Network Into
-          <span
-            class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-600">
-            Income
-          </span>
-        </h1>
-
-        <p class="text-xl text-muted-foreground mb-8 leading-relaxed">
-          Connect top talent with dream jobs. Earn substantial rewards for
-          successful placements. Join the marketplace where recruitment meets
-          opportunity.
-        </p>
-
-        <div class="flex items-center justify-center gap-4 mb-12">
-          <NuxtLink to="/bounties">
-            <Button size="lg" class="px-8 py-4 text-lg">
-              Browse Active Bounties
-            </Button>
-          </NuxtLink>
-          <NuxtLink to="/create">
-            <Button variant="outline" size="lg" class="px-8 py-4 text-lg">
-              Post a Bounty
-            </Button>
-          </NuxtLink>
+        <!-- Right Column - Image -->
+        <div class="flex justify-center lg:justify-end">
+          <NuxtImg
+            src="/recruityhub.png"
+            alt="RecruityHub"
+            class="max-w-full h-auto" />
         </div>
+      </div>
 
-        <!-- Live Stats -->
+      <!-- Live Stats Section -->
+      <div class="max-w-4xl mx-auto mt-16">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-2xl mx-auto">
           <div class="text-center">
             <div class="text-2xl font-bold text-foreground">
@@ -188,85 +203,6 @@
         <NuxtLink to="/create">
           <Button size="lg">Post the First Bounty</Button>
         </NuxtLink>
-      </div>
-    </div>
-
-    <!-- Features Section -->
-    <div class="bg-muted/30 py-16">
-      <div class="container mx-auto px-4">
-        <div class="text-center mb-12">
-          <h2 class="text-3xl font-bold text-foreground mb-4">
-            Why RecruityHub Works
-          </h2>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-          <div class="text-center">
-            <div
-              class="w-16 h-16 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-6">
-              <svg
-                class="w-8 h-8 text-green-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
-              </svg>
-            </div>
-            <h3 class="text-xl font-semibold mb-4">Guaranteed Payouts</h3>
-            <p class="text-muted-foreground">
-              Transparent reward system with guaranteed payments. No hidden
-              fees, no surprises.
-            </p>
-          </div>
-
-          <div class="text-center">
-            <div
-              class="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-6">
-              <svg
-                class="w-8 h-8 text-blue-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-              </svg>
-            </div>
-            <h3 class="text-xl font-semibold mb-4">Collaborative Network</h3>
-            <p class="text-muted-foreground">
-              Work with other top recruiters. Share opportunities and maximize
-              your earning potential.
-            </p>
-          </div>
-
-          <div class="text-center">
-            <div
-              class="w-16 h-16 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-6">
-              <svg
-                class="w-8 h-8 text-purple-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
-            </div>
-            <h3 class="text-xl font-semibold mb-4">Quality First</h3>
-            <p class="text-muted-foreground">
-              Only verified companies. All bounties come with clear requirements
-              and fair compensation.
-            </p>
-          </div>
-        </div>
       </div>
     </div>
   </div>

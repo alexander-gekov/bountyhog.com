@@ -44,12 +44,13 @@
               Bounties
             </NuxtLink>
             <NuxtLink
-              v-if="session.data?.user.userType === 'RECRUITER'"
+              v-if="session.data?.user"
               to="/my-bounties"
               class="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
               My Bounties
             </NuxtLink>
             <NuxtLink
+              v-if="session.data?.user"
               to="/create"
               class="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
               Create

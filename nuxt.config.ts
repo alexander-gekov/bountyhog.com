@@ -4,7 +4,7 @@ import path from "path";
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: "2025-07-15",
-  modules: ["shadcn-nuxt", "@vueuse/nuxt"],
+  modules: ["shadcn-nuxt", "@vueuse/nuxt", "@nuxt/image"],
   devtools: { enabled: true },
   css: ["@/app/assets/css/main.css"],
   plugins: ["@/app/plugins/ssr-width.ts"],
