@@ -1,58 +1,33 @@
 <template>
-  <!-- Simple fallback pattern background -->
-  <div
-    class="fixed inset-0 -z-10 bg-stone-50 dark:bg-stone-950"
-    style="
-      background-image: radial-gradient(
-        circle,
-        rgba(0, 0, 0, 0.15) 1px,
-        transparent 1px
-      );
-      background-size: 20px 20px;
-    "></div>
-
-  <!-- Dark mode pattern overlay -->
-  <div
-    class="fixed inset-0 -z-10 hidden dark:block"
-    style="
-      background-image: radial-gradient(
-        circle,
-        rgba(255, 255, 255, 0.08) 1px,
-        transparent 1px
-      );
-      background-size: 20px 20px;
-    "></div>
-
-  <PatternBackground
-    class="fixed inset-0 -z-10 opacity-30"
-    :variant="PATTERN_BACKGROUND_VARIANT.Grid"
-    :animate="true"
-    :direction="PATTERN_BACKGROUND_DIRECTION.Bottom"
-    size="lg" />
+  <!-- Clean background -->
+  <div class="fixed inset-0 -z-10 bg-white dark:bg-gray-900"></div>
   <!-- Navigation -->
-  <header class="border-b">
+  <header class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-200 dark:border-gray-800 sticky top-0 z-50">
     <div class="container mx-auto px-4 py-4">
       <nav class="flex items-center justify-between">
         <div class="flex items-center space-x-8">
-          <NuxtLink to="/" class="text-xl font-bold text-foreground">
-            RecruityHub
+          <NuxtLink to="/" class="flex items-center gap-2">
+            <div class="w-8 h-8 bg-gradient-to-br from-purple-600 to-pink-600 rounded-lg flex items-center justify-center">
+              <span class="text-white text-sm font-bold">R</span>
+            </div>
+            <span class="text-xl font-bold text-gray-900 dark:text-white">RecruityHub</span>
           </NuxtLink>
-          <div class="flex items-center space-x-6">
+          <div class="hidden md:flex items-center space-x-6">
             <NuxtLink
               to="/bounties"
-              class="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+              class="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
               Bounties
             </NuxtLink>
             <NuxtLink
               v-if="session.data?.user.userType === 'RECRUITER'"
               to="/my-bounties"
-              class="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+              class="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
               My Bounties
             </NuxtLink>
             <NuxtLink
               to="/create"
-              class="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-              Create
+              class="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
+              Learn
             </NuxtLink>
           </div>
         </div>
@@ -60,7 +35,7 @@
         <div class="flex items-center space-x-4">
           <DropdownMenu>
             <DropdownMenuTrigger as-child>
-              <Button size="sm" variant="ghost">
+              <Button size="sm" variant="ghost" class="w-9 h-9 p-0">
                 <LucideSun
                   class="w-4 h-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
                 <LucideMoon
@@ -83,19 +58,23 @@
           <template v-if="session.data">
             <NuxtLink
               to="/account"
-              class="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+              class="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
               Account
             </NuxtLink>
-            <Button @click="signOut" variant="outline" size="sm">
+            <Button @click="signOut" variant="outline" size="sm" class="rounded-xl">
               Sign Out
             </Button>
           </template>
           <template v-else>
             <NuxtLink to="/sign-in">
-              <Button variant="outline" size="sm"> Sign In </Button>
+              <Button variant="ghost" size="sm" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
+                Log in
+              </Button>
             </NuxtLink>
             <NuxtLink to="/sign-up">
-              <Button size="sm"> Sign Up </Button>
+              <Button size="sm" class="bg-gray-900 hover:bg-gray-800 text-white rounded-xl">
+                Get started
+              </Button>
             </NuxtLink>
           </template>
         </div>
@@ -110,14 +89,8 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  PATTERN_BACKGROUND_DIRECTION,
-  PATTERN_BACKGROUND_MASK,
-  PATTERN_BACKGROUND_VARIANT,
-} from "@/app/components/ui/pattern-background";
 import { LucideMoon, LucideSun } from "lucide-vue-next";
 import { authClient } from "@/lib/auth-client";
-import PatternBackground from "~/components/ui/pattern-background/PatternBackground.vue";
 
 const colorMode = useColorMode();
 
