@@ -18,6 +18,14 @@ export default defineEventHandler(async (event) => {
   try {
     const userType = session.user.userType;
 
+    if (!userType) {
+      return {
+        userType: null,
+        appliedBounties: [],
+        postedBounties: [],
+      };
+    }
+
     if (userType === "RECRUITER") {
       // Get recruiter's applied bounties (collaborations)
       let recruiter = await prisma.recruiter.findUnique({

@@ -43,36 +43,6 @@
               placeholder="••••••••" />
           </div>
 
-          <div>
-            <Label>Account Type</Label>
-            <RadioGroup
-              v-model="formData.userType"
-              class="grid grid-cols-2 gap-4 !mt-1">
-              <div>
-                <RadioGroupItem
-                  id="company"
-                  value="COMPANY"
-                  class="peer sr-only" />
-                <Label
-                  for="company"
-                  class="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary">
-                  Company
-                </Label>
-              </div>
-              <div>
-                <RadioGroupItem
-                  id="recruiter"
-                  value="RECRUITER"
-                  class="peer sr-only" />
-                <Label
-                  for="recruiter"
-                  class="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary">
-                  Recruiter
-                </Label>
-              </div>
-            </RadioGroup>
-          </div>
-
           <div v-if="error" class="pt-2">
             <div
               class="bg-red-50 border border-red-200 text-sm text-red-700 px-4 py-3 rounded">
@@ -188,14 +158,12 @@ interface SignUpFormData {
   name: string;
   email: string;
   password: string;
-  userType: "COMPANY" | "RECRUITER";
 }
 
 const formData = ref<SignUpFormData>({
   name: "",
   email: "",
   password: "",
-  userType: "COMPANY",
 });
 
 const isLoading = ref(false);
@@ -204,6 +172,7 @@ const error = ref("");
 const handleSignUpWithGoogle = async () => {
   await authClient.signIn.social({
     provider: "google",
+    callbackURL: "/",
   });
 };
 
@@ -227,19 +196,7 @@ const handleSignUp = async () => {
     }
 
     if (data?.user) {
-      try {
-        await $fetch("/api/user/update-type", {
-          method: "POST",
-          body: {
-            userId: data.user.id,
-            userType: formData.value.userType,
-          },
-        });
-      } catch (updateError) {
-        console.warn("Failed to update user type:", updateError);
-      }
-
-      await navigateTo("/");
+      await navigateTo("/onboarding");
     }
   } catch (err) {
     console.error("Sign up error:", err);

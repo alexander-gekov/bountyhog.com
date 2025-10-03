@@ -186,6 +186,7 @@ const lastMethod = authClient.getLastUsedLoginMethod();
 const handleSignInWithGoogle = async () => {
   await authClient.signIn.social({
     provider: "google",
+    callbackURL: "/",
   });
 };
 

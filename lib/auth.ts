@@ -13,9 +13,8 @@ export const auth = betterAuth({
     additionalFields: {
       userType: {
         type: "string",
-        required: true,
-        defaultValue: "COMPANY",
-        input: true,
+        required: false,
+        input: false,
       },
     },
   },
@@ -27,6 +26,11 @@ export const auth = betterAuth({
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID as string,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+    },
+  },
+  advanced: {
+    defaultCookieAttributes: {
+      sameSite: "lax",
     },
   },
 });
