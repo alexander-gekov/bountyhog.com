@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+import resend from "@/lib/resend";
 
 interface TallyWebhookData {
   eventId: string;
@@ -43,6 +43,21 @@ export default defineEventHandler(async (event) => {
     if (payload.eventType !== "FORM_RESPONSE") {
       console.log("Ignoring non-FORM_RESPONSE event");
       return { success: true, message: "Event type not handled" };
+    }
+
+    try {
+      const data = await resend.emails.send({
+        from: "BountyHog",
+        to: ["test@bountyhog.com"],
+        subject: "New submission for " + payload.data.formName,
+        html: `
+         You have a new submission for ${payload.data.formName}. View it here: https://bountyhog.com/
+        `,
+      });
+
+      return data;
+    } catch (error) {
+      return { error };
     }
   } catch (error: any) {
     console.error("Error processing Tally webhook:", error);
