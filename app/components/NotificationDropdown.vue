@@ -117,23 +117,12 @@ const handleNotificationClick = async (notification: any) => {
 
     switch (notification.type) {
       case "PARTNERSHIP_REQUEST":
-        if (data.bountyId) {
-          await navigateTo("/dashboard");
-        }
-        break;
       case "PARTNERSHIP_APPROVED":
       case "PARTNERSHIP_REJECTED":
-        if (data.bountyId) {
-          await navigateTo(`/company/bounty/${data.bountyId}`);
-        }
-        break;
       case "SUBMISSION_RECEIVED":
-        if (data.bountyId) {
-          await navigateTo(`/company/bounty/${data.bountyId}`);
-        }
+        await navigateTo("/my-bounties");
         break;
       default:
-        // Default navigation or no navigation
         break;
     }
   }

@@ -30,7 +30,7 @@
             {{ company.companyName || company.name }}
           </h1>
           <p v-if="company.bio" class="text-lg text-muted-foreground">
-            {{ company.bio }}
+            represented by {{ company.name }} {{ company.bio }}
           </p>
         </div>
 
@@ -147,7 +147,8 @@
           v-for="bounty in filteredBounties"
           :key="bounty.id"
           :bounty="bounty"
-          :company-name="company.companyName || company.name" />
+          :company-name="company.name || company.companyName"
+          :author-id="userId" />
       </ul>
     </div>
 
@@ -197,36 +198,35 @@
 import { useCompanyQuery } from "@/composables/useCompanyQuery";
 
 const route = useRoute();
-const userId = route.params.id as string;
+const userId = route.params.authorId as string;
 
 const statusFilter = ref("all");
 const sortBy = ref("newest");
 
-const { data: company, isPending: pending, error } = useCompanyQuery(userId);
+const { data: user, isPending: pending, error } = useCompanyQuery(userId);
 
-// Computed properties
+const company = computed(() => user.value);
+
 const openBounties = computed(
-  () => company.value?.bounties.filter((b: any) => b.status === "OPEN") || []
+  () => user.value?.bounties.filter((b: any) => b.status === "OPEN") || []
 );
 
 const totalBountyValue = computed(() => {
-  if (!company.value?.bounties) return 0;
-  return company.value.bounties
+  if (!user.value?.bounties) return 0;
+  return user.value.bounties
     .filter((b: any) => b.payoutType === "CASH")
     .reduce((sum: number, b: any) => sum + (b.payoutAmount || 0), 0);
 });
 
 const filteredBounties = computed(() => {
-  if (!company.value?.bounties) return [];
+  if (!user.value?.bounties) return [];
 
-  let filtered = [...company.value.bounties];
+  let filtered = [...user.value.bounties];
 
-  // Filter by status
   if (statusFilter.value !== "all") {
     filtered = filtered.filter((b: any) => b.status === statusFilter.value);
   }
 
-  // Sort
   switch (sortBy.value) {
     case "newest":
       filtered.sort(
@@ -265,41 +265,6 @@ const filteredBounties = computed(() => {
 
   return filtered;
 });
-
-// Helper functions
-const getBadgeVariant = (status: string) => {
-  switch (status) {
-    case "OPEN":
-      return "default";
-    case "IN_PROGRESS":
-      return "secondary";
-    case "COMPLETED":
-      return "outline";
-    case "CANCELLED":
-      return "destructive";
-    default:
-      return "secondary";
-  }
-};
-
-const formatDate = (dateString: string) => {
-  const date = new Date(dateString);
-  const now = new Date();
-  const diffTime = date.getTime() - now.getTime();
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-  if (diffDays < 0) {
-    return "Expired";
-  } else if (diffDays === 0) {
-    return "Today";
-  } else if (diffDays === 1) {
-    return "Tomorrow";
-  } else if (diffDays < 7) {
-    return `${diffDays} days`;
-  } else {
-    return date.toLocaleDateString();
-  }
-};
 </script>
 
 <style scoped>

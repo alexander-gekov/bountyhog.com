@@ -1,13 +1,11 @@
 <template>
-  <a
-    :href="`/company/bounty/${bounty.id}`"
-    class="block whitespace-nowrap hover:bg-muted/50">
+  <a :href="bountyUrl" class="block whitespace-nowrap hover:bg-muted/50">
     <li class="flex items-center py-2 px-3">
       <div class="flex-shrink-0 mr-3">
         <div class="relative rounded-full shrink-0 overflow-hidden w-8 h-8">
           <img
-            :src="`https://picsum.photos/20?random=${displayCompanyName}`"
-            :alt="displayCompanyName"
+            :src="bounty.user?.image"
+            :alt="bounty.user?.name"
             class="w-full h-full object-cover rounded-full" />
         </div>
       </div>
@@ -40,11 +38,14 @@ interface BountyProps {
     payoutAmount?: number | null;
     payoutPercentage?: number | null;
     user?: {
+      id?: string;
       companyName?: string;
       name?: string;
+      image?: string;
     };
   };
   companyName?: string;
+  authorId?: string;
 }
 
 const props = defineProps<BountyProps>();
@@ -56,5 +57,10 @@ const displayCompanyName = computed(() => {
     props.bounty.user?.name ||
     "Unknown Company"
   );
+});
+
+const bountyUrl = computed(() => {
+  const userId = props.authorId || props.bounty.user?.id;
+  return `/author/${userId}/bounty/${props.bounty.id}`;
 });
 </script>

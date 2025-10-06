@@ -78,6 +78,60 @@
               </div>
             </div> -->
 
+            <div>
+              <Label>Salary Range (Monthly Gross) *</Label>
+              <div class="grid grid-cols-2 gap-4 mt-2">
+                <div>
+                  <NumberField
+                    id="salaryMin"
+                    v-model:model-value="form.salaryMin"
+                    :min="0"
+                    :step="100"
+                    :default-value="3000"
+                    :format-options="{
+                      style: 'currency',
+                      currency: 'BGN',
+                      currencyDisplay: 'symbol',
+                      minimumFractionDigits: 0,
+                      maximumFractionDigits: 0,
+                    }">
+                    <Label for="salaryMin" class="text-sm text-muted-foreground"
+                      >Minimum</Label
+                    >
+                    <NumberFieldContent>
+                      <NumberFieldDecrement />
+                      <NumberFieldInput />
+                      <NumberFieldIncrement />
+                    </NumberFieldContent>
+                  </NumberField>
+                </div>
+                <div>
+                  <NumberField
+                    id="salaryMax"
+                    v-model:model-value="form.salaryMax"
+                    :min="0"
+                    :step="100"
+                    :default-value="5000"
+                    :format-options="{
+                      style: 'currency',
+                      currency: 'BGN',
+                      currencyDisplay: 'symbol',
+                      minimumFractionDigits: 0,
+                      maximumFractionDigits: 0,
+                    }">
+                    <Label for="salaryMax" class="text-sm text-muted-foreground"
+                      >Maximum</Label
+                    >
+                    <NumberFieldContent>
+                      <NumberFieldDecrement />
+                      <NumberFieldInput />
+                      <NumberFieldIncrement />
+                    </NumberFieldContent>
+                  </NumberField>
+                </div>
+              </div>
+            </div>
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <Label for="deadline">Application Deadline</Label>
@@ -183,38 +237,125 @@
           </CardContent>
         </Card>
 
-        <!-- Requirements -->
+        <!-- Application Form Builder -->
         <Card>
           <CardHeader>
-            <CardTitle>Requirements</CardTitle>
+            <CardTitle>Application Form Fields</CardTitle>
             <CardDescription>
-              List the key requirements and qualifications for this role
+              Define the fields that candidates need to fill when applying for
+              this role
             </CardDescription>
           </CardHeader>
-          <CardContent class="space-y-4">
+          <CardContent class="space-y-6">
             <div
-              v-for="(requirement, index) in form.requirements"
-              :key="index"
-              class="flex items-center gap-2">
-              <Input
-                v-model:model-value="form.requirements[index]"
-                placeholder="e.g., 5+ years of React experience"
-                class="flex-1" />
-              <Button
-                @click="removeRequirement(index)"
-                type="button"
-                variant="outline"
-                size="sm"
-                :disabled="form.requirements.length <= 1">
-                Remove
-              </Button>
+              v-for="(field, index) in form.formFields"
+              :key="field.id"
+              class="p-4 border rounded-lg space-y-4 bg-muted/20">
+              <div class="flex items-start justify-between gap-4">
+                <div class="flex-1 space-y-4">
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label :for="`field-label-${index}`">Field Label *</Label>
+                      <Input
+                        :id="`field-label-${index}`"
+                        v-model:model-value="field.label"
+                        placeholder="e.g., Years of Experience"
+                        class="mt-1" />
+                    </div>
+
+                    <div>
+                      <Label :for="`field-type-${index}`">Field Type *</Label>
+                      <Select v-model:model-value="field.type" class="mt-1">
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="INPUT_TEXT">Short Text</SelectItem>
+                          <SelectItem value="TEXTAREA">Long Text</SelectItem>
+                          <SelectItem value="FILE_UPLOAD"
+                            >File Upload</SelectItem
+                          >
+                          <SelectItem value="CHECKBOXES">Checkboxes</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label :for="`field-placeholder-${index}`"
+                      >Placeholder/Help Text</Label
+                    >
+                    <Input
+                      :id="`field-placeholder-${index}`"
+                      v-model:model-value="field.placeholder"
+                      placeholder="e.g., Enter your total years of professional experience"
+                      class="mt-1" />
+                  </div>
+
+                  <div v-if="field.type === 'CHECKBOXES'" class="space-y-2">
+                    <Label>Options (one per line) *</Label>
+                    <Textarea
+                      v-model:model-value="field.options"
+                      placeholder="Option 1&#10;Option 2&#10;Option 3"
+                      rows="3"
+                      class="mt-1 font-mono text-sm" />
+                  </div>
+
+                  <div class="flex items-center gap-4">
+                    <div class="flex items-center space-x-2">
+                      <Checkbox
+                        :id="`field-required-${index}`"
+                        v-model:model-value="field.required"
+                        :default-checked="true" />
+                      <Label
+                        :for="`field-required-${index}`"
+                        class="text-sm font-normal cursor-pointer">
+                        Required field
+                      </Label>
+                    </div>
+
+                    <div
+                      v-if="field.type === 'FILE_UPLOAD'"
+                      class="flex items-center space-x-2">
+                      <Checkbox
+                        :id="`field-multiple-${index}`"
+                        v-model:checked="field.multiple" />
+                      <Label
+                        :for="`field-multiple-${index}`"
+                        class="text-sm font-normal cursor-pointer">
+                        Allow multiple files
+                      </Label>
+                    </div>
+                  </div>
+                </div>
+
+                <Button
+                  @click="removeFormField(index)"
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  class="mt-6">
+                  <svg
+                    class="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M6 18L18 6M6 6l12 12"></path>
+                  </svg>
+                </Button>
+              </div>
             </div>
 
             <Button
-              @click="addRequirement"
+              @click="addFormField"
               type="button"
               variant="outline"
-              size="sm">
+              size="sm"
+              class="w-full">
               <svg
                 class="w-4 h-4 mr-2"
                 fill="none"
@@ -226,37 +367,14 @@
                   stroke-width="2"
                   d="M12 4v16m8-8H4"></path>
               </svg>
-              Add Requirement
+              Add Form Field
             </Button>
-          </CardContent>
-        </Card>
 
-        <!-- Process & Guidelines -->
-        <Card>
-          <CardHeader>
-            <CardTitle>Process & Guidelines</CardTitle>
-            <CardDescription>
-              Provide additional context about the hiring process and
-              expectations
-            </CardDescription>
-          </CardHeader>
-          <CardContent class="space-y-6">
-            <div>
-              <Label for="interviewProcess">Interview Process</Label>
-              <Textarea
-                id="interviewProcess"
-                v-model:model-value="form.interviewProcess"
-                placeholder="Describe your interview process (e.g., 3 rounds: Technical screening, System design, Cultural fit)"
-                rows="3" />
-            </div>
-
-            <div>
-              <Label for="guidelines">Guidelines for Recruiters</Label>
-              <Textarea
-                id="guidelines"
-                v-model:model-value="form.guidelines"
-                placeholder="Any specific guidelines, preferences, or instructions for recruiters working on this bounty"
-                rows="3" />
+            <div
+              v-if="form.formFields.length === 0"
+              class="text-center py-8 text-muted-foreground text-sm">
+              No custom fields added. Default fields (Name, Email, Resume) will
+              be included automatically.
             </div>
           </CardContent>
         </Card>
@@ -272,7 +390,6 @@
             class="min-w-[120px]">
             {{ isSubmitting ? "Creating..." : "Create Bounty" }}
           </Button>
-          {{ isFormValid }}
         </div>
       </form>
     </div>
@@ -289,6 +406,16 @@ const queryClient = useQueryClient();
 
 const enabled = computed(() => !!session.value?.data);
 
+interface FormField {
+  id: string;
+  label: string;
+  type: string;
+  placeholder: string;
+  required: boolean;
+  options: string;
+  multiple: boolean;
+}
+
 // Form state
 const isSubmitting = ref(false);
 const form = ref({
@@ -299,9 +426,9 @@ const form = ref({
   payoutType: "CASH",
   payoutAmount: 5000 as number | null,
   payoutPercentage: 8 as number | null,
-  requirements: [""],
-  interviewProcess: "",
-  guidelines: "",
+  salaryMin: 3000 as number | null,
+  salaryMax: 5000 as number | null,
+  formFields: [] as FormField[],
   picture: null as File | null,
   picturePreview: "" as string,
 });
@@ -318,7 +445,12 @@ const isFormValid = computed(() => {
     form.value.title &&
     form.value.description &&
     form.value.guaranteeTimeframe &&
-    form.value.payoutType;
+    form.value.payoutType &&
+    form.value.salaryMin !== null &&
+    form.value.salaryMax !== null &&
+    form.value.salaryMin > 0 &&
+    form.value.salaryMax > 0 &&
+    form.value.salaryMax >= form.value.salaryMin;
 
   const payoutValid =
     form.value.payoutType === "CASH"
@@ -329,52 +461,20 @@ const isFormValid = computed(() => {
 });
 
 // Methods
-const addRequirement = () => {
-  form.value.requirements.push("");
+const addFormField = () => {
+  form.value.formFields.push({
+    id: `field-${Date.now()}-${Math.random()}`,
+    label: "",
+    type: "TEXTAREA",
+    placeholder: "",
+    required: true,
+    options: "",
+    multiple: false,
+  });
 };
 
-const removeRequirement = (index: number) => {
-  if (form.value.requirements.length > 1) {
-    form.value.requirements.splice(index, 1);
-  }
-};
-
-const handlePictureUpload = (event: Event) => {
-  const target = event.target as HTMLInputElement;
-  const file = target.files?.[0];
-
-  if (!file) return;
-
-  // Check file size (5MB limit)
-  if (file.size > 5 * 1024 * 1024) {
-    alert("File size must be less than 5MB");
-    target.value = "";
-    return;
-  }
-
-  // Check file type
-  if (!file.type.startsWith("image/")) {
-    alert("Please select an image file");
-    target.value = "";
-    return;
-  }
-
-  form.value.picture = file;
-
-  // Create preview URL
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    form.value.picturePreview = e.target?.result as string;
-  };
-  reader.readAsDataURL(file);
-};
-
-const removePicture = () => {
-  form.value.picture = null;
-  form.value.picturePreview = "";
-  // Clear the file input
-  const fileInput = document.getElementById("picture") as HTMLInputElement;
-  if (fileInput) fileInput.value = "";
+const removeFormField = (index: number) => {
+  form.value.formFields.splice(index, 1);
 };
 
 const submitBounty = async () => {
@@ -399,9 +499,20 @@ const submitBounty = async () => {
         form.value.payoutType === "PERCENTAGE"
           ? form.value.payoutPercentage
           : null,
-      requirements: form.value.requirements.filter((req) => req.trim()),
-      interviewProcess: form.value.interviewProcess || null,
-      guidelines: form.value.guidelines || null,
+      salaryMin: form.value.salaryMin,
+      salaryMax: form.value.salaryMax,
+      formFields: form.value.formFields.map((field) => ({
+        id: field.id,
+        label: field.label,
+        type: field.type,
+        placeholder: field.placeholder || "",
+        required: field.required,
+        options: field.options
+          ? field.options.split("\n").filter((opt) => opt.trim())
+          : [],
+        multiple: field.multiple,
+      })),
+      createTallyForm: form.value.formFields.length > 0,
       // Company data (only if creating new company)
       company: null,
     };
@@ -424,7 +535,9 @@ const submitBounty = async () => {
     await queryClient.invalidateQueries({ queryKey: ["user-bounties"] });
 
     // Redirect to the newly created bounty
-    await navigateTo(`/company/bounty/${response.id}`);
+    await navigateTo(
+      `/author/${session.value?.data?.user.id}/bounty/${response.id}`
+    );
   } catch (error) {
     console.error("Failed to create bounty:", error);
     // TODO: Show error message to user

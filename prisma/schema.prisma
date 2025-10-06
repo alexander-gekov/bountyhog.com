@@ -24,7 +24,7 @@ model User {
   websiteUrl    String?
   chatMessages  ChatMessage[]
   accounts      Account[]
-  bounty        Bounty[]
+  bounties        Bounty[]
   bountyNotes   BountyNote[]
   notifications Notification[]
   recruiter     Recruiter?
@@ -107,6 +107,11 @@ model Bounty {
   guidelines         String?
   status             BountyStatus             @default(OPEN)
   formFields         Json?
+  salaryMin          Float?
+  salaryMax          Float?
+  tallyFormId        String?
+  tallyFormUrl       String?
+  tallyFormPassword  String?
   createdAt          DateTime                 @default(now())
   updatedAt          DateTime                 @updatedAt
   picture            String?

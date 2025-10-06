@@ -208,7 +208,7 @@
                       <div class="mb-3">
                         <p class="text-sm font-medium mb-1">Interested in:</p>
                         <NuxtLink
-                          :to="`/company/bounty/${request.bounty.id}`"
+                          :to="`/author/${request.bounty.user.id}/bounty/${request.bounty.id}`"
                           class="text-primary hover:underline">
                           {{ request.bounty.title }}
                         </NuxtLink>
@@ -356,7 +356,8 @@
                           bounty.payoutType === "CASH" ? "Cash" : "Percentage"
                         }}
                       </div>
-                      <NuxtLink :to="`/company/bounty/${bounty.id}`">
+                      <NuxtLink
+                        :to="`/author/${bounty.user.id}/bounty/${bounty.id}`">
                         <Button size="sm" variant="outline"
                           >View Details</Button
                         >
@@ -424,7 +425,7 @@
                       <p class="text-sm text-muted-foreground mb-2">
                         For:
                         <NuxtLink
-                          :to="`/company/bounty/${submission.bounty.id}`"
+                          :to="`/author/${submission.bounty.user.id}/bounty/${submission.bounty.id}`"
                           class="text-primary hover:underline">
                           {{ submission.bounty.title }}
                         </NuxtLink>
@@ -437,7 +438,8 @@
                       </div>
                     </div>
                     <div class="ml-4">
-                      <NuxtLink :to="`/company/bounty/${submission.bounty.id}`">
+                      <NuxtLink
+                        :to="`/author/${submission.bounty.user.id}/bounty/${submission.bounty.id}`">
                         <Button size="sm" variant="outline">Review</Button>
                       </NuxtLink>
                     </div>

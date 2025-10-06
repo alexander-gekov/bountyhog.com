@@ -115,7 +115,7 @@
             <a
               v-for="bounty in featuredBounties"
               :key="bounty.id"
-              :href="`/company/bounty/${bounty.id}`"
+              :href="`/author/${bounty.user.id}/bounty/${bounty.id}`"
               class="block whitespace-nowrap hover:bg-muted/50">
               <li class="flex items-center py-3 px-3">
                 <div class="flex-shrink-0 mr-3">

@@ -44,9 +44,9 @@
                 d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
             </svg>
             <NuxtLink
-              :to="`/company/${bounty.company.id}`"
+              :to="`/author/${bounty.user.id}`"
               class="hover:text-foreground">
-              {{ bounty.company.companyName }}
+              {{ bounty.user.companyName }}
             </NuxtLink>
           </div>
 
@@ -226,7 +226,7 @@
               </NuxtLink>
             </template>
 
-            <template v-else-if="user.userType === 'RECRUITER'">
+            <template v-else-if="user.userType === 'RECRUITER' && !isAuthor">
               <template v-if="!isCollaborating">
                 <p class="text-sm text-muted-foreground">
                   Express your interest to start working on this bounty.
@@ -330,7 +330,15 @@
                   </p>
                 </div>
                 <div class="space-y-3">
+                  <a
+                    v-if="bounty.tallyFormUrl"
+                    :href="bounty.tallyFormUrl"
+                    target="_blank"
+                    rel="noopener noreferrer">
+                    <Button class="w-full"> Submit Candidates Here </Button>
+                  </a>
                   <Button
+                    v-else
                     class="w-full"
                     @click="showSubmissionForm = !showSubmissionForm">
                     {{ showSubmissionForm ? "Hide Form" : "Submit Candidate" }}
@@ -345,12 +353,37 @@
               </template>
             </template>
 
-            <template v-else>
+            <template v-else-if="isAuthor">
               <p class="text-sm text-muted-foreground">
                 This is your company's bounty. You can manage collaborations and
                 submissions.
               </p>
-              <Button class="w-full" variant="outline"> Manage Bounty </Button>
+              <div class="flex flex-col gap-3">
+                <a
+                  v-if="bounty.tallyFormUrl"
+                  :href="bounty.tallyFormUrl"
+                  target="_blank"
+                  rel="noopener noreferrer">
+                  <Button class="w-full" variant="outline">
+                    Preview Application Form
+                  </Button>
+                </a>
+                <Button class="w-full" @click="navigateTo('/my-bounties')">
+                  View Submissions
+                </Button>
+              </div>
+            </template>
+
+            <template v-else>
+              <p class="text-sm text-muted-foreground">
+                View this bounty's details and requirements.
+              </p>
+              <Button
+                class="w-full"
+                variant="outline"
+                @click="navigateTo('/bounties')">
+                Browse All Bounties
+              </Button>
             </template>
           </CardContent>
         </Card>
@@ -384,15 +417,15 @@
         <!-- Company Info -->
         <Card>
           <CardHeader>
-            <CardTitle>About {{ bounty.company.companyName }}</CardTitle>
+            <CardTitle>About {{ bounty.user.companyName }}</CardTitle>
           </CardHeader>
           <CardContent>
             <p
-              v-if="bounty.company.description"
+              v-if="bounty.user.description"
               class="text-sm text-muted-foreground mb-4">
-              {{ bounty.company.description }}
+              {{ bounty.user.bio }}
             </p>
-            <NuxtLink :to="`/company/${bounty.company.id}`">
+            <NuxtLink :to="`/author/${bounty.user.id}`">
               <Button variant="outline" size="sm" class="w-full">
                 View All Bounties
               </Button>
@@ -447,13 +480,11 @@ const route = useRoute();
 const bountyId = route.params.id as string;
 const queryClient = useQueryClient();
 
-// Get current user
 const session = authClient.useSession();
 const user = computed(() => session.value?.data?.user);
 
 const { data: bounty, isPending: pending, error } = useBountyQuery(bountyId);
 
-// Parse requirements
 const requirements = computed(() => {
   if (!bounty.value?.requirements) return [];
   try {
@@ -463,7 +494,6 @@ const requirements = computed(() => {
   }
 });
 
-// Check if user is collaborating
 const collaboration = computed(() => {
   if (!user.value || !bounty.value?.collaborations) return null;
   return bounty.value.collaborations.find(
@@ -473,7 +503,10 @@ const collaboration = computed(() => {
 
 const isCollaborating = computed(() => !!collaboration.value);
 
-// Form state
+const isAuthor = computed(() => {
+  return user.value && bounty.value && user.value.id === bounty.value.user.id;
+});
+
 const newNote = ref("");
 const isExpressingInterest = ref(false);
 const showInterestForm = ref(false);
@@ -481,7 +514,6 @@ const introductionText = ref("");
 const showSubmissionForm = ref(false);
 const isSubmittingCandidate = ref(false);
 
-// Express interest
 const expressInterest = async () => {
   if (!user.value || !introductionText.value.trim()) return;
 
@@ -504,13 +536,11 @@ const expressInterest = async () => {
   }
 };
 
-// Cancel interest form
 const cancelInterest = () => {
   showInterestForm.value = false;
   introductionText.value = "";
 };
 
-// Submit note
 const submitNote = async () => {
   if (!newNote.value.trim() || !user.value) return;
 
@@ -528,7 +558,6 @@ const submitNote = async () => {
   }
 };
 
-// Handle candidate submission
 const handleCandidateSubmission = async (payload: {
   form: {
     candidateName: string;
@@ -546,7 +575,6 @@ const handleCandidateSubmission = async (payload: {
   isSubmittingCandidate.value = true;
 
   try {
-    // Create FormData for file upload
     const formData = new FormData();
     formData.append("candidateName", form.candidateName);
     formData.append("candidateEmail", form.candidateEmail || "");
@@ -567,7 +595,6 @@ const handleCandidateSubmission = async (payload: {
   }
 };
 
-// Format date helper
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
   const now = new Date();

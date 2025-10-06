@@ -20,6 +20,7 @@ export default defineEventHandler(async (event) => {
           select: {
             id: true,
             name: true,
+            image: true,
             companyName: true,
             bio: true,
             websiteUrl: true,

@@ -66,7 +66,7 @@ export default defineEventHandler(async (event) => {
 
   // Check authentication
   const session = await auth.api.getSession({
-    headers: event.node.req.headers,
+    headers: event.node.req.headers as any,
   });
   if (!session?.user) {
     throw createError({
@@ -80,11 +80,27 @@ export default defineEventHandler(async (event) => {
     !body.title ||
     !body.description ||
     !body.guaranteeTimeframe ||
-    !body.payoutType
+    !body.payoutType ||
+    body.salaryMin === null ||
+    body.salaryMin === undefined ||
+    body.salaryMax === null ||
+    body.salaryMax === undefined
   ) {
     throw createError({
       statusCode: 400,
       statusMessage: "Missing required fields",
+    });
+  }
+
+  // Validate salary range
+  if (
+    body.salaryMin <= 0 ||
+    body.salaryMax <= 0 ||
+    body.salaryMax < body.salaryMin
+  ) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: "Invalid salary range",
     });
   }
 
@@ -110,6 +126,36 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
+    let tallyFormId: string | null = null;
+    let tallyFormUrl: string | null = null;
+    let tallyFormPassword: string | null = null;
+
+    if (body.formFields && body.formFields.length > 0 && body.createTallyForm) {
+      try {
+        const tallyResponse = await $fetch<{
+          id: string;
+          url: string;
+          password: string;
+        }>("/api/tally/create-form", {
+          method: "POST",
+          body: {
+            bountyTitle: body.title,
+            bountyDescription: body.description,
+            formFields: body.formFields,
+          },
+          headers: event.node.req.headers as any,
+        });
+
+        tallyFormId = tallyResponse.id;
+        tallyFormUrl = tallyResponse.url;
+        tallyFormPassword = tallyResponse.password;
+      } catch (tallyError: any) {
+        console.error("Failed to create Tally form:", tallyError);
+        console.error("Tally error details:", tallyError.message);
+        console.error("Tally error stack:", tallyError.stack);
+      }
+    }
+
     const bounty = await prisma.bounty.create({
       data: {
         title: body.title,
@@ -120,9 +166,15 @@ export default defineEventHandler(async (event) => {
         payoutPercentage: body.payoutPercentage || null,
         guaranteeTimeframe: body.guaranteeTimeframe,
         deadline: body.deadline ? new Date(body.deadline) : null,
-        requirements: JSON.stringify(body.requirements || []),
+        requirements: JSON.stringify([]),
         interviewProcess: body.interviewProcess || null,
         guidelines: body.guidelines || null,
+        salaryMin: body.salaryMin,
+        salaryMax: body.salaryMax,
+        formFields: body.formFields || null,
+        tallyFormId: tallyFormId,
+        tallyFormUrl: tallyFormUrl,
+        tallyFormPassword: tallyFormPassword,
         picture: pictureUrl,
         status: "OPEN",
       },
@@ -131,18 +183,22 @@ export default defineEventHandler(async (event) => {
           select: {
             id: true,
             name: true,
+            image: true,
             companyName: true,
           },
         },
       },
     });
 
+    console.log("Bounty created successfully:", bounty.id);
     return bounty;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error creating bounty:", error);
+    console.error("Error message:", error.message);
+    console.error("Error stack:", error.stack);
     throw createError({
       statusCode: 500,
-      statusMessage: "Failed to create bounty",
+      statusMessage: error.message || "Failed to create bounty",
     });
   }
 });

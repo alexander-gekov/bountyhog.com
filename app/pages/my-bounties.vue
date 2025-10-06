@@ -14,7 +14,7 @@
     <!-- Check for valid user types -->
     <div
       v-else-if="
-        !['RECRUITER', 'COMPANY'].includes(session.data?.user.userType)
+        !['RECRUITER', 'COMPANY'].includes(session.data?.user.userType || '')
       "
       class="text-center py-16">
       <h1 class="text-2xl font-bold mb-4">Access Restricted</h1>
@@ -194,7 +194,9 @@
                 <Bounty
                   :bounty="collaboration.bounty"
                   @click="
-                    navigateTo(`/company/bounty/${collaboration.bounty.id}`)
+                    navigateTo(
+                      `/author/${collaboration.bounty.user.id}/bounty/${collaboration.bounty.id}`
+                    )
                   ">
                   <div class="text-xs text-muted-foreground">
                     <div class="flex items-center gap-2">
@@ -315,7 +317,9 @@
               <div class="hover:bg-muted/50 transition-colors">
                 <Bounty
                   :bounty="bounty"
-                  @click="navigateTo(`/company/bounty/${bounty.id}`)">
+                  @click="
+                    navigateTo(`/author/${bounty.user.id}/bounty/${bounty.id}`)
+                  ">
                   <div class="text-xs text-muted-foreground">
                     <div class="flex items-center gap-2">
                       <Badge :variant="getBountyStatusVariant(bounty.status)">
@@ -755,7 +759,7 @@ watch(
 watch(
   session,
   (sessionData) => {
-    if (process.client && sessionData.data) {
+    if (process.client && sessionData.data?.user.userType) {
       const userType = sessionData.data.user.userType;
       if (!["RECRUITER", "COMPANY"].includes(userType)) {
         navigateTo("/bounties");

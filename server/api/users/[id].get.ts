@@ -28,6 +28,14 @@ export default defineEventHandler(async (event) => {
         userType: true,
         bounties: {
           include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                image: true,
+                companyName: true,
+              },
+            },
             _count: {
               select: {
                 collaborations: true,

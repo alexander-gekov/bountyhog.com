@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 
 export default defineEventHandler(async (event) => {
   const session = await auth.api.getSession({
-    headers: event.node.req.headers,
+    headers: event.node.req.headers as any,
   });
 
   if (!session?.user) {
@@ -53,6 +53,7 @@ export default defineEventHandler(async (event) => {
                 select: {
                   id: true,
                   name: true,
+                  image: true,
                   companyName: true,
                 },
               },
@@ -78,6 +79,7 @@ export default defineEventHandler(async (event) => {
             select: {
               id: true,
               name: true,
+              image: true,
               companyName: true,
             },
           },
@@ -90,6 +92,7 @@ export default defineEventHandler(async (event) => {
                       id: true,
                       name: true,
                       email: true,
+                      image: true,
                     },
                   },
                 },
@@ -105,6 +108,7 @@ export default defineEventHandler(async (event) => {
                       id: true,
                       name: true,
                       email: true,
+                      image: true,
                     },
                   },
                 },
@@ -153,6 +157,7 @@ export default defineEventHandler(async (event) => {
                       id: true,
                       name: true,
                       email: true,
+                      image: true,
                     },
                   },
                 },
@@ -168,6 +173,7 @@ export default defineEventHandler(async (event) => {
                       id: true,
                       name: true,
                       email: true,
+                      image: true,
                     },
                   },
                 },
