@@ -32,7 +32,8 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const workspaceId = process.env.TALLY_WORKSPACE_ID;
+  const config = useRuntimeConfig();
+  const baseUrl = config.public.siteUrl || "https://bountyhog.com";
 
   try {
     const result = await createTallyForm(
@@ -40,7 +41,7 @@ export default defineEventHandler(async (event) => {
       body.bountyDescription || "",
       body.formFields,
       tallyApiKey,
-      workspaceId
+      session.user
     );
 
     return result;

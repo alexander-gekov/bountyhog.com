@@ -8,6 +8,11 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   css: ["@/app/assets/css/main.css"],
   plugins: ["@/app/plugins/ssr-width.ts"],
+  runtimeConfig: {
+    public: {
+      siteUrl: process.env.NUXT_PUBLIC_SITE_URL || "http://localhost:3000",
+    },
+  },
   vite: {
     resolve: {
       alias: {

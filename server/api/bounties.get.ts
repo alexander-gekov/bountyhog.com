@@ -12,7 +12,24 @@ export default defineEventHandler(async (event) => {
       where: {
         status: "OPEN",
       },
-      include: {
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        payoutType: true,
+        payoutAmount: true,
+        payoutPercentage: true,
+        guaranteeTimeframe: true,
+        deadline: true,
+        requirements: true,
+        interviewProcess: true,
+        guidelines: true,
+        status: true,
+        salaryMin: true,
+        salaryMax: true,
+        createdAt: true,
+        updatedAt: true,
+        picture: true,
         user: {
           select: {
             id: true,

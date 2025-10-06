@@ -138,10 +138,7 @@
       <div class="w-full max-w-md text-left space-y-6">
         <Quote class="w-16 h-16 text-foreground/20" :stroke-width="1.5" />
         <p class="text-2xl font-medium text-foreground/80 leading-relaxed">
-          A GitHub issue is this atomic unit of a problem, and allowing you to
-          put a cash bounty on it, to solve this specific problem, without any
-          overhead, and make it available to any person, I find it very
-          interesting.
+          As a recruiter, sometimes our agency can't handle all the workload. It's awesome that we can still take those opportunities and share part of the revenue with sub-processors through BountyHog.
         </p>
         <div class="flex items-center gap-4">
           <Avatar>

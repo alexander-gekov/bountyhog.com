@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import { auth } from "@/lib/auth";
 
 const prisma = new PrismaClient();
 
@@ -11,6 +12,12 @@ export default defineEventHandler(async (event) => {
       statusMessage: "Bounty ID is required",
     });
   }
+
+  const session = await auth.api.getSession({
+    headers: event.node.req.headers as any,
+  });
+
+  const userId = session?.user?.id;
 
   try {
     const bounty = await prisma.bounty.findUnique({
@@ -70,6 +77,14 @@ export default defineEventHandler(async (event) => {
       });
     }
 
+    const isAuthor = userId === bounty.userId;
+
+    const userCollaboration = userId
+      ? bounty.collaborations.find((c: any) => c.recruiter.userId === userId)
+      : null;
+
+    const isApprovedCollaborator = userCollaboration?.status === "APPROVED";
+
     bounty.collaborations = bounty.collaborations.map((collaboration) => ({
       ...collaboration,
       recruiter: {
@@ -85,7 +100,29 @@ export default defineEventHandler(async (event) => {
       },
     }));
 
-    return bounty;
+    if (!userId) {
+      return {
+        ...bounty,
+        tallyFormUrl: null,
+        tallyFormPassword: null,
+        formFields: null,
+      };
+    }
+
+    if (isAuthor) {
+      return bounty;
+    }
+
+    if (isApprovedCollaborator) {
+      return bounty;
+    }
+
+    return {
+      ...bounty,
+      tallyFormUrl: null,
+      tallyFormPassword: null,
+      formFields: null,
+    };
   } catch (error) {
     console.error("Error fetching bounty:", error);
     throw createError({

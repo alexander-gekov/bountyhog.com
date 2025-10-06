@@ -85,6 +85,18 @@ export default defineEventHandler(async (event) => {
           },
           collaborations: {
             include: {
+              bounty: {
+                include: {
+                  user: {
+                    select: {
+                      id: true,
+                      name: true,
+                      image: true,
+                      companyName: true,
+                    },
+                  },
+                },
+              },
               recruiter: {
                 include: {
                   user: {
@@ -145,6 +157,7 @@ export default defineEventHandler(async (event) => {
             select: {
               id: true,
               name: true,
+              image: true,
               companyName: true,
             },
           },

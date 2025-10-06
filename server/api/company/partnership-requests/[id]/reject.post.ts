@@ -25,11 +25,12 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  // Check if user is a company
-  if (session.user.userType !== "COMPANY") {
+  // Check if user has a user type (either COMPANY or RECRUITER can reject)
+  if (!session.user.userType) {
     throw createError({
       statusCode: 403,
-      statusMessage: "Only companies can reject partnership requests",
+      statusMessage:
+        "Only companies and recruiters can reject partnership requests",
     });
   }
 

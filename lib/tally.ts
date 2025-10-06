@@ -26,6 +26,9 @@ interface TallyFormRequest {
     pageAutoJump?: boolean;
     saveForLater?: boolean;
     password?: string;
+    safeEmailTo?: string;
+    safeEmailSubject?: string;
+    safeEmailFromName?: string;
   };
   workspaceId?: string;
 }
@@ -55,6 +58,7 @@ export function generateTallyBlocks(
       groupType: "LABEL",
       payload: {
         html: bountyDescription,
+        isRequired: false,
       },
     });
   }
@@ -220,7 +224,73 @@ export function generateTallyBlocks(
     }
   });
 
+  const agreementGroupUuid = crypto.randomUUID();
+  blocks.push({
+    uuid: crypto.randomUUID(),
+    type: "TITLE",
+    groupUuid: agreementGroupUuid,
+    groupType: "QUESTION",
+    payload: {
+      html: "You are about to send the candidates details to the author. In your interest, please make sure that you have made a legally-binding agreement with the author before sending the candidates details.",
+    },
+  });
+  blocks.push({
+    uuid: crypto.randomUUID(),
+    type: "CHECKBOX",
+    groupUuid: agreementGroupUuid,
+    groupType: "CHECKBOXES",
+    payload: {
+      text: "I have made a legally-binding agreement with the author and want to send the candidates details to the author.",
+      index: 0,
+      isFirst: true,
+      isLast: true,
+      isRequired: true,
+    },
+  });
+
   return blocks;
+}
+
+export async function createTallyWebhook(
+  formId: string,
+  apiKey: string
+): Promise<{ id: string }> {
+  const response = await fetch("https://api.tally.so/webhooks", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      formId,
+      url: `https://bountyhog.com/api/form/${formId}/webhook`,
+      eventTypes: ["FORM_RESPONSE"],
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error("Tally Webhook API Error Response:", errorText);
+    let errorMessage = response.statusText;
+    try {
+      const error = JSON.parse(errorText);
+      errorMessage = error.message || error.error || errorText;
+    } catch (e) {
+      errorMessage = errorText;
+    }
+    throw new Error(`Failed to create Tally webhook: ${errorMessage}`);
+  }
+
+  const data = await response.json();
+  console.log("Tally Webhook Success Response:", JSON.stringify(data, null, 2));
+
+  if (!data.id) {
+    throw new Error("Tally Webhook API did not return a webhook ID");
+  }
+
+  return {
+    id: data.id,
+  };
 }
 
 export async function createTallyForm(
@@ -228,15 +298,23 @@ export async function createTallyForm(
   bountyDescription: string,
   formFields: FormField[],
   apiKey: string,
-  workspaceId?: string
-): Promise<{ id: string; url: string; password: string }> {
+  user: {
+    id: string;
+    createdAt: Date;
+    updatedAt: Date;
+    email: string;
+    emailVerified: boolean;
+    name: string;
+    image?: string | null | undefined | undefined;
+    userType?: string | null | undefined;
+  }
+): Promise<{ id: string; url: string; password: string; webhookId?: string }> {
   const blocks = generateTallyBlocks(
     bountyTitle,
     bountyDescription,
     formFields
   );
 
-  // openssl rand string max 8 chars;
   const password = crypto.randomUUID().substring(0, 10);
 
   const requestBody: TallyFormRequest = {
@@ -247,12 +325,10 @@ export async function createTallyForm(
       pageAutoJump: false,
       saveForLater: true,
       password: password,
+      safeEmailTo: `${user.email}`,
+      safeEmailSubject: `BountyHog - New submission for ${bountyTitle}`,
     },
   };
-
-  if (workspaceId) {
-    requestBody.workspaceId = workspaceId;
-  }
 
   console.log(JSON.stringify(requestBody, null, 2));
 
@@ -288,9 +364,24 @@ export async function createTallyForm(
     throw new Error("Tally API did not return a form ID");
   }
 
-  return {
+  const result: {
+    id: string;
+    url: string;
+    password: string;
+    webhookId?: string;
+  } = {
     id: data.id,
     url: `https://tally.so/r/${data.id}`,
     password: password,
   };
+
+  try {
+    const webhook = await createTallyWebhook(data.id, apiKey);
+    result.webhookId = webhook.id;
+    console.log(`Webhook created with ID: ${webhook.id}`);
+  } catch (error) {
+    console.error("Failed to create webhook, but form was created:", error);
+  }
+
+  return result;
 }

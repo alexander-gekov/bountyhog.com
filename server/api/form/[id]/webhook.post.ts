@@ -1,0 +1,54 @@
+import { prisma } from "@/lib/prisma";
+
+interface TallyWebhookData {
+  eventId: string;
+  eventType: "FORM_RESPONSE";
+  createdAt: string;
+  data: {
+    responseId: string;
+    submissionId: string;
+    respondentId: string;
+    formId: string;
+    formName: string;
+    createdAt: string;
+    fields: Array<{
+      key: string;
+      label: string;
+      type: string;
+      value: any;
+      options?: Array<{
+        id: string;
+        text: string;
+      }>;
+    }>;
+  };
+}
+
+export default defineEventHandler(async (event) => {
+  const formId = getRouterParam(event, "id");
+
+  if (!formId) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: "Form ID is required",
+    });
+  }
+
+  try {
+    const payload: TallyWebhookData = await readBody(event);
+
+    console.log("Received Tally webhook for form:", formId);
+    console.log("Payload:", JSON.stringify(payload, null, 2));
+
+    if (payload.eventType !== "FORM_RESPONSE") {
+      console.log("Ignoring non-FORM_RESPONSE event");
+      return { success: true, message: "Event type not handled" };
+    }
+  } catch (error: any) {
+    console.error("Error processing Tally webhook:", error);
+    throw createError({
+      statusCode: 500,
+      statusMessage: error.message || "Failed to process webhook",
+    });
+  }
+});
