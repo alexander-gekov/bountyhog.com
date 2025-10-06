@@ -183,7 +183,7 @@ const lastMethod = authClient.getLastUsedLoginMethod();
 const handleSignInWithGoogle = async () => {
   await authClient.signIn.social({
     provider: "google",
-    callbackURL: window.location.origin,
+    callbackURL: '/',
   });
 };
 
@@ -197,7 +197,7 @@ const handleSignIn = async () => {
     const { data, error: authError } = await authClient.signIn.email({
       email: formData.value.email,
       password: formData.value.password,
-      callbackURL: window.location.origin,
+      callbackURL: '/',
     });
 
     if (authError) {
