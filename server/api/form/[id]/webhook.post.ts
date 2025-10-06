@@ -69,7 +69,7 @@ export default defineEventHandler(async (event) => {
 
     try {
       const data = await resend.emails.send({
-        from: "BountyHog",
+        from: "submissions@bountyhog.com",
         to: [user?.email || ""],
         subject: "New submission for " + payload.data.formName,
         html: `
