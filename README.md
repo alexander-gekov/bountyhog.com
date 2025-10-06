@@ -1,4 +1,4 @@
-# RecruityHub
+# BountyHog
 
 A marketplace that merges job recruitment with a bounty model. Companies post bounties for open roles (cash or percentage-based rewards for successful hires), and recruiters can browse and apply to bounties to earn income by sourcing candidates.
 
