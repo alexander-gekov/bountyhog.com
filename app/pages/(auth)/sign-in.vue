@@ -3,7 +3,7 @@
     <!-- Left side: Form -->
     <div
       class="flex flex-col justify-between p-6 sm:p-10 bg-background text-foreground">
-      <NuxtLink to="/" class="text-2xl font-bold"> RecruityHub </NuxtLink>
+      <NuxtLink to="/" class="font-mono flex items-center gap-2 text-2xl font-bold"><img src="/logo.png" alt="BountyHog" class="w-14 h-14"></img>BountyHog </NuxtLink>
 
       <div class="mx-auto my-auto w-full max-w-sm space-y-6">
         <div class="space-y-2 text-left">
@@ -186,7 +186,7 @@ const lastMethod = authClient.getLastUsedLoginMethod();
 const handleSignInWithGoogle = async () => {
   await authClient.signIn.social({
     provider: "google",
-    callbackURL: "/",
+    callbackURL: window.location.origin,
   });
 };
 
@@ -209,7 +209,12 @@ const handleSignIn = async () => {
     }
 
     if (data?.user) {
-      await navigateTo("/");
+      const user = data.user as typeof data.user & { userType?: string | null };
+      if (!user.userType) {
+        await navigateTo("/onboarding");
+      } else {
+        await navigateTo("/");
+      }
     }
   } catch (err) {
     console.error("Sign in error:", err);

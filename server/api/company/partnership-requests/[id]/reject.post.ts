@@ -34,23 +34,14 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    // Get company profile
-    let company = await prisma.company.findUnique({
-      where: { userId: session.user.id },
-    });
-
-    if (!company) {
-      throw createError({
-        statusCode: 404,
-        statusMessage: "Company profile not found",
-      });
-    }
-
-    // Verify the partnership request belongs to this company
     const partnershipRequest = await prisma.recruiterCollaboration.findUnique({
       where: { id: requestId },
       include: {
-        bounty: true,
+        bounty: {
+          include: {
+            user: true,
+          },
+        },
         recruiter: {
           include: {
             user: true,
@@ -66,7 +57,7 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    if (partnershipRequest.bounty.companyId !== company.id) {
+    if (partnershipRequest.bounty.userId !== session.user.id) {
       throw createError({
         statusCode: 403,
         statusMessage: "You can only reject requests for your own bounties",
@@ -101,7 +92,9 @@ export default defineEventHandler(async (event) => {
         data: {
           bountyId: partnershipRequest.bountyId,
           bountyTitle: partnershipRequest.bounty.title,
-          companyName: company.companyName,
+          companyName:
+            partnershipRequest.bounty.user.companyName ||
+            partnershipRequest.bounty.user.name,
           rejectionReason: body.reason || "No reason provided",
         },
       },

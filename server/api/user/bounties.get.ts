@@ -27,7 +27,6 @@ export default defineEventHandler(async (event) => {
     }
 
     if (userType === "RECRUITER") {
-      // Get recruiter's applied bounties (collaborations)
       let recruiter = await prisma.recruiter.findUnique({
         where: { userId: session.user.id },
       });
@@ -50,9 +49,10 @@ export default defineEventHandler(async (event) => {
         include: {
           bounty: {
             include: {
-              company: {
+              user: {
                 select: {
                   id: true,
+                  name: true,
                   companyName: true,
                 },
               },
@@ -69,69 +69,62 @@ export default defineEventHandler(async (event) => {
         },
       });
 
-      // For recruiters who can also post bounties, get their posted bounties if they have a company
-      const company = await prisma.company.findUnique({
-        where: { userId: session.user.id },
+      const postedBounties = await prisma.bounty.findMany({
+        where: {
+          userId: session.user.id,
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              companyName: true,
+            },
+          },
+          collaborations: {
+            include: {
+              recruiter: {
+                include: {
+                  user: {
+                    select: {
+                      id: true,
+                      name: true,
+                      email: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+          submissions: {
+            include: {
+              recruiter: {
+                include: {
+                  user: {
+                    select: {
+                      id: true,
+                      name: true,
+                      email: true,
+                    },
+                  },
+                },
+              },
+            },
+            orderBy: {
+              createdAt: "desc",
+            },
+          },
+          _count: {
+            select: {
+              collaborations: true,
+              submissions: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
       });
-
-      let postedBounties = [];
-      if (company) {
-        postedBounties = await prisma.bounty.findMany({
-          where: {
-            companyId: company.id,
-          },
-          include: {
-            company: {
-              select: {
-                id: true,
-                companyName: true,
-              },
-            },
-            collaborations: {
-              include: {
-                recruiter: {
-                  include: {
-                    user: {
-                      select: {
-                        id: true,
-                        name: true,
-                        email: true,
-                      },
-                    },
-                  },
-                },
-              },
-            },
-            submissions: {
-              include: {
-                recruiter: {
-                  include: {
-                    user: {
-                      select: {
-                        id: true,
-                        name: true,
-                        email: true,
-                      },
-                    },
-                  },
-                },
-              },
-              orderBy: {
-                createdAt: "desc",
-              },
-            },
-            _count: {
-              select: {
-                collaborations: true,
-                submissions: true,
-              },
-            },
-          },
-          orderBy: {
-            createdAt: "desc",
-          },
-        });
-      }
 
       return {
         userType: "RECRUITER",
@@ -139,26 +132,15 @@ export default defineEventHandler(async (event) => {
         postedBounties,
       };
     } else if (userType === "COMPANY") {
-      // Get company's posted bounties
-      let company = await prisma.company.findUnique({
-        where: { userId: session.user.id },
-      });
-
-      if (!company) {
-        throw createError({
-          statusCode: 404,
-          statusMessage: "Company profile not found",
-        });
-      }
-
       const postedBounties = await prisma.bounty.findMany({
         where: {
-          companyId: company.id,
+          userId: session.user.id,
         },
         include: {
-          company: {
+          user: {
             select: {
               id: true,
+              name: true,
               companyName: true,
             },
           },

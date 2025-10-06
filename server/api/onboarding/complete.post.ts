@@ -2,7 +2,19 @@ import { prisma } from "@/lib/prisma";
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event);
-  const { userId, userType } = body;
+  const {
+    userId,
+    userType,
+    name,
+    email,
+    phone,
+    bio,
+    companyName,
+    image,
+    linkedinUrl,
+    facebookUrl,
+    websiteUrl,
+  } = body;
 
   if (!userId || !userType) {
     throw createError({
@@ -20,24 +32,21 @@ export default defineEventHandler(async (event) => {
 
   const user = await prisma.user.update({
     where: { id: userId },
-    data: { userType },
+    data: {
+      userType,
+      name: name || undefined,
+      email: email || undefined,
+      phone: phone || undefined,
+      bio: bio || undefined,
+      companyName: companyName || undefined,
+      image: image || undefined,
+      linkedinUrl: linkedinUrl || undefined,
+      facebookUrl: facebookUrl || undefined,
+      websiteUrl: websiteUrl || undefined,
+    },
   });
 
-  if (userType === "COMPANY") {
-    const existingCompany = await prisma.company.findUnique({
-      where: { userId },
-    });
-
-    if (!existingCompany) {
-      await prisma.company.create({
-        data: {
-          userId,
-          companyName: user.name,
-          description: "",
-        },
-      });
-    }
-  } else if (userType === "RECRUITER") {
+  if (userType === "RECRUITER") {
     const existingRecruiter = await prisma.recruiter.findUnique({
       where: { userId },
     });
@@ -46,7 +55,7 @@ export default defineEventHandler(async (event) => {
       await prisma.recruiter.create({
         data: {
           userId,
-          bio: "",
+          bio: bio || "",
           experience: "",
           specialties: "",
         },

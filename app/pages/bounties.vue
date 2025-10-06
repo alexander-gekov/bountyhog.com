@@ -53,48 +53,51 @@
           </div>
         </div>
       </div>
-
-      <!-- Bounties List -->
-      <div
-        v-else-if="filteredBounties?.length"
-        class="relative -mx-2 -mt-2 overflow-auto scrollbar-thin">
-        <ul class="divide-y divide-border">
-          <Bounty
-            v-for="bounty in filteredBounties"
-            :key="bounty.id"
-            :bounty="bounty" />
-        </ul>
-
-        <!-- Load More Button -->
-        <div v-if="hasNextPage" class="flex justify-center mt-6">
-          <Button @click="fetchNextPage" variant="outline"> Load More </Button>
-        </div>
-      </div>
-
-      <!-- Empty State -->
-      <div v-else class="text-center py-16">
+      <div v-else>
+        <!-- Bounties List -->
         <div
-          class="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-          <svg
-            class="w-8 h-8 text-muted-foreground"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24">
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-          </svg>
+          v-if="filteredBounties?.length"
+          class="relative -mx-2 -mt-2 overflow-auto scrollbar-thin">
+          <ul class="divide-y divide-border">
+            <Bounty
+              v-for="bounty in filteredBounties"
+              :key="bounty.id"
+              :bounty="bounty" />
+          </ul>
+
+          <!-- Load More Button -->
+          <div v-if="hasNextPage" class="flex justify-center mt-6">
+            <Button @click="fetchNextPage" variant="outline">
+              Load More
+            </Button>
+          </div>
         </div>
-        <h3 class="text-lg font-semibold mb-2">No bounties found</h3>
-        <p class="text-muted-foreground mb-6">
-          Be the first to post a bounty or check back later for new
-          opportunities.
-        </p>
-        <NuxtLink to="/create">
-          <Button>Post a Bounty</Button>
-        </NuxtLink>
+
+        <!-- Empty State -->
+        <div v-else class="text-center py-16">
+          <div
+            class="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg
+              class="w-8 h-8 text-muted-foreground"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+          </div>
+          <h3 class="text-lg font-semibold mb-2">No bounties found</h3>
+          <p class="text-muted-foreground mb-6">
+            Be the first to post a bounty or check back later for new
+            opportunities.
+          </p>
+          <NuxtLink to="/create">
+            <Button>Post a Bounty</Button>
+          </NuxtLink>
+        </div>
       </div>
     </div>
   </div>
@@ -107,12 +110,12 @@ import { useInfiniteBountiesQuery } from "@/composables/useInfiniteBountiesQuery
 const sortBy = ref("newest");
 const selectedTechFilters = ref<string[]>([]);
 
-const { 
-  data: bountiesData, 
-  isPending: pending, 
-  fetchNextPage, 
-  hasNextPage, 
-  prefetchBounties 
+const {
+  data: bountiesData,
+  isPending: pending,
+  fetchNextPage,
+  hasNextPage,
+  prefetchBounties,
 } = useInfiniteBountiesQuery();
 
 onMounted(() => {
@@ -120,7 +123,7 @@ onMounted(() => {
 });
 
 const allBounties = computed(() => {
-  return bountiesData.value?.pages.flatMap(page => page.bounties) || [];
+  return bountiesData.value?.pages.flatMap((page) => page.bounties) || [];
 });
 
 // Extract technologies from requirements
@@ -223,7 +226,6 @@ const filteredBounties = computed(() => {
       return filtered;
   }
 });
-
 </script>
 
 <style scoped>

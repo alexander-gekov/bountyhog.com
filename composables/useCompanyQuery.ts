@@ -1,16 +1,16 @@
-import { useQuery } from '@tanstack/vue-query';
+import { useQuery } from "@tanstack/vue-query";
 
-export const useCompanyQuery = (companyId: string) => {
-  const fetchCompany = async () => {
-    const response = await fetch(`/api/companies/${companyId}`);
+export const useCompanyQuery = (userId: string) => {
+  const fetchUser = async () => {
+    const response = await fetch(`/api/users/${userId}`);
     if (!response.ok) {
-      throw new Error('Network response was not ok');
+      throw new Error("Network response was not ok");
     }
     return response.json();
   };
 
   return useQuery({
-    queryKey: ['company', companyId],
-    queryFn: fetchCompany,
+    queryKey: ["user", userId],
+    queryFn: fetchUser,
   });
 };

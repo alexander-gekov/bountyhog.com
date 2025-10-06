@@ -16,12 +16,13 @@ export default defineEventHandler(async (event) => {
     const bounty = await prisma.bounty.findUnique({
       where: { id },
       include: {
-        company: {
+        user: {
           select: {
             id: true,
+            name: true,
             companyName: true,
-            description: true,
-            website: true,
+            bio: true,
+            websiteUrl: true,
           },
         },
         collaborations: {

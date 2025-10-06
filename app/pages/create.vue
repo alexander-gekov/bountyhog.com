@@ -20,7 +20,7 @@
         </p>
       </div>
 
-      <form @submit.prevent="submitBounty" class="space-y-8">
+      <form class="space-y-8">
         <!-- Basic Information -->
         <Card>
           <CardHeader>
@@ -49,7 +49,7 @@
                 required />
             </div>
 
-            <div>
+            <!-- <div>
               <Label for="picture">Bounty Picture (Optional)</Label>
               <div class="">
                 <Input
@@ -76,7 +76,7 @@
                   Remove Picture
                 </Button>
               </div>
-            </div>
+            </div> -->
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
@@ -261,56 +261,18 @@
           </CardContent>
         </Card>
 
-        <!-- Company Information (for new companies) -->
-        <Card v-if="!userCompany">
-          <CardHeader>
-            <CardTitle>Company Information</CardTitle>
-            <CardDescription>
-              Since this is your first bounty, please provide your company
-              details
-            </CardDescription>
-          </CardHeader>
-          <CardContent class="space-y-6">
-            <div>
-              <Label for="companyName">Company Name *</Label>
-              <Input
-                id="companyName"
-                v-model:model-value="form.companyName"
-                placeholder="Your Company Name"
-                required />
-            </div>
-
-            <div>
-              <Label for="companyDescription">Company Description</Label>
-              <Textarea
-                id="companyDescription"
-                v-model:model-value="form.companyDescription"
-                placeholder="Brief description of your company and what you do"
-                rows="3" />
-            </div>
-
-            <div>
-              <Label for="companyWebsite">Company Website</Label>
-              <Input
-                id="companyWebsite"
-                v-model:model-value="form.companyWebsite"
-                type="url"
-                placeholder="https://yourcompany.com" />
-            </div>
-          </CardContent>
-        </Card>
-
         <!-- Submit -->
         <div class="flex items-center justify-end gap-4 pt-6">
           <NuxtLink to="/bounties">
             <Button type="button" variant="outline"> Cancel </Button>
           </NuxtLink>
           <Button
-            type="submit"
+            @click="submitBounty"
             :disabled="isSubmitting || !isFormValid"
             class="min-w-[120px]">
             {{ isSubmitting ? "Creating..." : "Create Bounty" }}
           </Button>
+          {{ isFormValid }}
         </div>
       </form>
     </div>
@@ -320,15 +282,12 @@
 <script lang="ts" setup>
 import { authClient } from "@/lib/auth-client";
 import { useQueryClient } from "@tanstack/vue-query";
-import { useUserCompanyQuery } from "@/composables/useUserCompanyQuery";
 
 // Auth check
 const session = authClient.useSession();
 const queryClient = useQueryClient();
 
 const enabled = computed(() => !!session.value?.data);
-
-const { data: userCompany } = useUserCompanyQuery(enabled);
 
 // Form state
 const isSubmitting = ref(false);
@@ -345,10 +304,6 @@ const form = ref({
   guidelines: "",
   picture: null as File | null,
   picturePreview: "" as string,
-  // Company fields (only for new companies)
-  companyName: "",
-  companyDescription: "",
-  companyWebsite: "",
 });
 
 // Computed
@@ -370,9 +325,7 @@ const isFormValid = computed(() => {
       ? form.value.payoutAmount && form.value.payoutAmount > 0
       : form.value.payoutPercentage && form.value.payoutPercentage > 0;
 
-  const companyValid = userCompany.value || form.value.companyName;
-
-  return basicValid && payoutValid && companyValid;
+  return basicValid && payoutValid;
 });
 
 // Methods
@@ -450,13 +403,7 @@ const submitBounty = async () => {
       interviewProcess: form.value.interviewProcess || null,
       guidelines: form.value.guidelines || null,
       // Company data (only if creating new company)
-      company: !userCompany.value
-        ? {
-            companyName: form.value.companyName,
-            description: form.value.companyDescription || null,
-            website: form.value.companyWebsite || null,
-          }
-        : null,
+      company: null,
     };
 
     // Add JSON data to FormData

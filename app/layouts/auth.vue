@@ -7,13 +7,11 @@
     size="sm"
     :mask="PATTERN_BACKGROUND_MASK.Ellipse">
     <!-- Navigation for authenticated users -->
-    <header class="border-b">
-      <div class="container mx-auto px-4 py-4">
+    <header>
+      <div class="container mx-auto max-w-7xl space-y-6 p-4 md:p-6 lg:px-8">
         <nav class="flex items-center justify-between">
           <div class="flex items-center space-x-8">
-            <NuxtLink to="/" class="text-xl font-bold text-foreground">
-              RecruityHub
-            </NuxtLink>
+            <NuxtLink to="/" class="font-mono flex items-center gap-2 text-2xl font-bold"><img src="/logo.png" alt="BountyHog" class="w-14 h-14"></img>BountyHog </NuxtLink>
             <div class="flex items-center space-x-6">
               <NuxtLink
                 to="/bounties"
@@ -100,7 +98,7 @@ const session = authClient.useSession();
 watch(
   session,
   (sessionData) => {
-    if (process.client && !sessionData.data) {
+    if (!sessionData.data) {
       navigateTo("/sign-in");
     }
   },

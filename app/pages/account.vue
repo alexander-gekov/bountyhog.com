@@ -121,34 +121,6 @@
               </CardDescription>
             </CardHeader>
             <CardContent class="space-y-4">
-              <div>
-                <h4 class="font-semibold">{{ company.companyName }}</h4>
-                <p
-                  v-if="company.description"
-                  class="text-sm text-muted-foreground mt-1">
-                  {{ company.description }}
-                </p>
-                <a
-                  v-if="company.website"
-                  :href="company.website"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="text-sm text-primary hover:underline flex items-center gap-1 mt-2">
-                  <svg
-                    class="w-3 h-3"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24">
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-                  </svg>
-                  Visit Website
-                </a>
-              </div>
-
               <div class="pt-4 border-t">
                 <div class="grid grid-cols-2 gap-4 text-sm">
                   <div>
@@ -420,7 +392,7 @@
 <script lang="ts" setup>
 import { authClient } from "@/lib/auth-client";
 import { useQueryClient } from "@tanstack/vue-query";
-import { useUserCompanyQuery } from "@/composables/useUserCompanyQuery";
+
 import { useUserRecruiterQuery } from "@/composables/useUserRecruiterQuery";
 import { useUserCompanyStatsQuery } from "@/composables/useUserCompanyStatsQuery";
 import { useUserRecruiterStatsQuery } from "@/composables/useUserRecruiterStatsQuery";
@@ -433,7 +405,7 @@ const queryClient = useQueryClient();
 const enabled = computed(() => !!session.value?.data);
 
 // Fetch additional data based on user type
-const { data: company } = useUserCompanyQuery(enabled);
+
 const { data: recruiter } = useUserRecruiterQuery(enabled);
 const { data: companyStats } = useUserCompanyStatsQuery(enabled);
 const { data: recruiterStats } = useUserRecruiterStatsQuery(enabled);

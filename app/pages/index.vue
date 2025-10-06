@@ -8,15 +8,14 @@
         <div class="text-center lg:text-left">
           <div
             class="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium mb-6">
-            <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+            <div class="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
             Live bounties • Active deals happening now
           </div>
 
           <h1
             class="text-5xl md:text-6xl font-bold tracking-tight text-foreground mb-6">
             Turn Your Network Into
-            <span
-              class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-600">
+            <span class="text-transparent bg-clip-text bg-primary">
               Income
             </span>
           </h1>
@@ -46,13 +45,13 @@
         <div class="flex justify-center lg:justify-end">
           <NuxtImg
             src="/recruityhub.png"
-            alt="RecruityHub"
+            alt="BountyHog"
             class="max-w-full h-auto" />
         </div>
       </div>
 
       <!-- Live Stats Section -->
-      <div class="max-w-4xl mx-auto mt-16">
+      <!-- <div class="max-w-4xl mx-auto mt-16">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-2xl mx-auto">
           <div class="text-center">
             <div class="text-2xl font-bold text-foreground">
@@ -61,7 +60,7 @@
             <div class="text-sm text-muted-foreground">Active Bounties</div>
           </div>
           <div class="text-center">
-            <div class="text-2xl font-bold text-green-600">
+            <div class="text-2xl font-bold">
               ${{ totalPayout?.toLocaleString() }}
             </div>
             <div class="text-sm text-muted-foreground">
@@ -75,11 +74,11 @@
             <div class="text-sm text-muted-foreground">Active Recruiters</div>
           </div>
         </div>
-      </div>
+      </div> -->
     </div>
 
     <!-- Live Bounties Section -->
-    <div class="container mx-auto px-4 pb-16">
+    <div class="container mx-auto px-4 pb-16 mt-24">
       <div class="text-center mb-12">
         <h2 class="text-3xl font-bold text-foreground mb-4">
           Latest Opportunities
@@ -124,11 +123,7 @@
                     class="relative rounded-full shrink-0 overflow-hidden w-10 h-10">
                     <span
                       class="flex rounded-full bg-gradient-to-br from-blue-500 to-purple-600 items-center justify-center w-full h-full text-sm font-semibold text-white">
-                      {{ bounty.company.companyName.charAt(0).toUpperCase()
-                      }}{{
-                        bounty.company.companyName.charAt(1)?.toUpperCase() ||
-                        ""
-                      }}
+                      {{ bounty.user.name.charAt(0).toUpperCase() }}
                     </span>
                   </div>
                 </div>
@@ -136,7 +131,7 @@
                 <div class="flex-grow min-w-0 mr-4">
                   <div class="flex items-center text-sm">
                     <span class="font-semibold mr-1">
-                      {{ bounty.company.companyName }}
+                      {{ bounty.user.companyName }}
                     </span>
                     <span class="text-muted-foreground mr-2">
                       #{{ bounty.id.slice(-4) }}
@@ -152,7 +147,7 @@
                     </span>
                     <span class="text-foreground mr-2">{{ bounty.title }}</span>
                     <span
-                      class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
+                      class="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
                       NEW
                     </span>
                   </div>
@@ -180,22 +175,7 @@
       </div>
 
       <!-- Empty State -->
-      <div v-else class="text-center py-16 max-w-2xl mx-auto">
-        <div
-          class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <svg
-            class="w-8 h-8 text-blue-600"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24">
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
-          </svg>
-        </div>
-        <h3 class="text-xl font-semibold mb-2">Be the First to Get Started</h3>
+      <div v-else class="text-center py-16 max-w-sm mx-auto">
         <p class="text-muted-foreground mb-6">
           No bounties yet, but that means you have the opportunity to be among
           the first!
@@ -210,8 +190,21 @@
 
 <script lang="ts" setup>
 import { useBountiesQuery } from "@/composables/useBountiesQuery";
+import { authClient } from "@/lib/auth-client";
 
 const { data: bounties, isPending: pending } = useBountiesQuery();
+
+const session = authClient.useSession();
+
+watch(
+  session,
+  () => {
+    if (session.value?.data?.user && !session.value.data.user.userType) {
+      navigateTo("/onboarding");
+    }
+  },
+  { immediate: true }
+);
 
 // Computed values for stats and featured bounties
 const featuredBounties = computed(() => {

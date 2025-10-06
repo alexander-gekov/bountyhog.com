@@ -4,11 +4,11 @@
     <div class="w-full max-w-4xl">
       <div class="mb-8 text-center">
         <NuxtLink to="/" class="text-2xl font-bold inline-block mb-4">
-          RecruityHub
+          BountyHog
         </NuxtLink>
         <div class="flex items-center justify-center gap-2 mt-6">
           <div
-            v-for="step in 2"
+            v-for="step in 3"
             :key="step"
             class="h-2 rounded-full transition-all"
             :class="[
@@ -20,9 +20,117 @@
       <div class="bg-card border rounded-lg shadow-sm p-8">
         <div v-if="currentStep === 1" class="space-y-8">
           <div class="text-center space-y-2">
+            <h1 class="text-3xl font-bold">Complete Your Profile</h1>
+            <p class="text-muted-foreground">
+              All fields are optional, but filling them out makes you more
+              trustworthy
+            </p>
+          </div>
+
+          <div class="max-w-2xl mx-auto space-y-6">
+            <div class="flex justify-center">
+              <div class="relative">
+                <Avatar class="w-24 h-24">
+                  <AvatarImage v-if="formData.image" :src="formData.image" />
+                  <AvatarFallback class="text-2xl">
+                    {{ getInitials(formData.name) }}
+                  </AvatarFallback>
+                </Avatar>
+              </div>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-4">
+              <div class="space-y-2">
+                <Label for="name">Full Name</Label>
+                <Input
+                  id="name"
+                  v-model="formData.name"
+                  placeholder="John Doe" />
+              </div>
+
+              <div class="space-y-2">
+                <Label for="email">Business Email</Label>
+                <Input
+                  id="email"
+                  v-model="formData.email"
+                  type="email"
+                  placeholder="john@company.com" />
+              </div>
+            </div>
+
+            <div class="space-y-2">
+              <Label for="phone">Phone Number</Label>
+              <Input
+                id="phone"
+                v-model="formData.phone"
+                type="tel"
+                placeholder="+1 (555) 123-4567" />
+            </div>
+
+            <div class="space-y-2">
+              <Label for="company">Company</Label>
+              <Input
+                id="company"
+                v-model="formData.companyName"
+                placeholder="Acme Inc." />
+            </div>
+
+            <div class="space-y-2">
+              <Label for="bio">Bio</Label>
+              <Textarea
+                id="bio"
+                v-model="formData.bio"
+                placeholder="Tell us about yourself..."
+                class="min-h-[100px]" />
+            </div>
+
+            <div class="space-y-4">
+              <Label>Social Links</Label>
+
+              <div class="space-y-2">
+                <Label for="linkedin" class="text-sm text-muted-foreground"
+                  >LinkedIn URL</Label
+                >
+                <Input
+                  id="linkedin"
+                  v-model="formData.linkedinUrl"
+                  placeholder="https://linkedin.com/in/johndoe" />
+              </div>
+
+              <div class="space-y-2">
+                <Label for="facebook" class="text-sm text-muted-foreground"
+                  >Facebook URL</Label
+                >
+                <Input
+                  id="facebook"
+                  v-model="formData.facebookUrl"
+                  placeholder="https://facebook.com/johndoe" />
+              </div>
+
+              <div class="space-y-2">
+                <Label for="website" class="text-sm text-muted-foreground"
+                  >Website URL</Label
+                >
+                <Input
+                  id="website"
+                  v-model="formData.websiteUrl"
+                  placeholder="https://yourwebsite.com" />
+              </div>
+            </div>
+          </div>
+
+          <div class="flex justify-center pt-4">
+            <Button @click="goToStep2" size="lg" class="px-8">
+              Continue
+            </Button>
+          </div>
+        </div>
+
+        <div v-if="currentStep === 2" class="space-y-8">
+          <div class="text-center space-y-2">
             <h1 class="text-3xl font-bold">Choose Your Account Type</h1>
             <p class="text-muted-foreground">
-              Select the option that best describes how you'll use RecruityHub
+              Select the option that best describes how you'll use BountyHog
             </p>
           </div>
 
@@ -77,54 +185,9 @@
                 <div>
                   <h3 class="text-xl font-semibold mb-2">Company</h3>
                   <p class="text-sm text-muted-foreground leading-relaxed">
-                    Post recruitment bounties and connect with a global network
-                    of talented recruiters. Pay only for successful hires.
+                    Post bounties and get access to employer branding features.
+                    Only companies can post bounties.
                   </p>
-                </div>
-
-                <div class="pt-2 space-y-2">
-                  <div class="flex items-start gap-2 text-sm">
-                    <svg
-                      class="w-4 h-4 text-primary mt-0.5 flex-shrink-0"
-                      fill="currentColor"
-                      viewBox="0 0 20 20">
-                      <path
-                        fill-rule="evenodd"
-                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                        clip-rule="evenodd" />
-                    </svg>
-                    <span class="text-muted-foreground"
-                      >Post unlimited bounties</span
-                    >
-                  </div>
-                  <div class="flex items-start gap-2 text-sm">
-                    <svg
-                      class="w-4 h-4 text-primary mt-0.5 flex-shrink-0"
-                      fill="currentColor"
-                      viewBox="0 0 20 20">
-                      <path
-                        fill-rule="evenodd"
-                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                        clip-rule="evenodd" />
-                    </svg>
-                    <span class="text-muted-foreground"
-                      >Access top recruiters</span
-                    >
-                  </div>
-                  <div class="flex items-start gap-2 text-sm">
-                    <svg
-                      class="w-4 h-4 text-primary mt-0.5 flex-shrink-0"
-                      fill="currentColor"
-                      viewBox="0 0 20 20">
-                      <path
-                        fill-rule="evenodd"
-                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                        clip-rule="evenodd" />
-                    </svg>
-                    <span class="text-muted-foreground"
-                      >Performance-based pricing</span
-                    >
-                  </div>
                 </div>
               </div>
             </button>
@@ -179,60 +242,20 @@
                 <div>
                   <h3 class="text-xl font-semibold mb-2">Recruiter</h3>
                   <p class="text-sm text-muted-foreground leading-relaxed">
-                    Browse bounties from companies worldwide and earn rewards by
-                    submitting qualified candidates who get hired.
+                    Can create bounties, apply to work for bounties, and submit
+                    candidates. Full platform access.
                   </p>
-                </div>
-
-                <div class="pt-2 space-y-2">
-                  <div class="flex items-start gap-2 text-sm">
-                    <svg
-                      class="w-4 h-4 text-primary mt-0.5 flex-shrink-0"
-                      fill="currentColor"
-                      viewBox="0 0 20 20">
-                      <path
-                        fill-rule="evenodd"
-                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                        clip-rule="evenodd" />
-                    </svg>
-                    <span class="text-muted-foreground"
-                      >Browse global opportunities</span
-                    >
-                  </div>
-                  <div class="flex items-start gap-2 text-sm">
-                    <svg
-                      class="w-4 h-4 text-primary mt-0.5 flex-shrink-0"
-                      fill="currentColor"
-                      viewBox="0 0 20 20">
-                      <path
-                        fill-rule="evenodd"
-                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                        clip-rule="evenodd" />
-                    </svg>
-                    <span class="text-muted-foreground"
-                      >Earn competitive rewards</span
-                    >
-                  </div>
-                  <div class="flex items-start gap-2 text-sm">
-                    <svg
-                      class="w-4 h-4 text-primary mt-0.5 flex-shrink-0"
-                      fill="currentColor"
-                      viewBox="0 0 20 20">
-                      <path
-                        fill-rule="evenodd"
-                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                        clip-rule="evenodd" />
-                    </svg>
-                    <span class="text-muted-foreground">No upfront costs</span>
-                  </div>
                 </div>
               </div>
             </button>
           </div>
 
-          <div class="flex justify-center pt-4">
+          <div class="flex justify-center gap-4 pt-4">
+            <Button @click="currentStep = 1" variant="outline" size="lg">
+              Back
+            </Button>
             <Button
-              @click="goToStep2"
+              @click="goToStep3"
               :disabled="!selectedType"
               size="lg"
               class="px-8">
@@ -241,115 +264,127 @@
           </div>
         </div>
 
-        <div v-if="currentStep === 2" class="space-y-8">
+        <div v-if="currentStep === 3" class="space-y-8">
           <div class="text-center space-y-2">
             <h1 class="text-3xl font-bold">How It Works</h1>
             <p class="text-muted-foreground">
-              {{
-                selectedType === "COMPANY"
-                  ? "Start hiring with RecruityHub in 3 simple steps"
-                  : "Start earning with RecruityHub in 3 simple steps"
-              }}
+              Understanding the bounty workflow
             </p>
           </div>
 
-          <div
-            v-if="selectedType === 'COMPANY'"
-            class="space-y-6 max-w-2xl mx-auto">
-            <div class="flex gap-6 items-start">
-              <div
-                class="flex-shrink-0 w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-lg">
-                1
-              </div>
-              <div class="pt-2">
-                <h3 class="text-xl font-semibold mb-2">Post a Bounty</h3>
-                <p class="text-muted-foreground">
-                  Create a detailed job listing with your requirements, budget,
-                  and timeline. Set a reward amount for successful placements.
-                </p>
-              </div>
-            </div>
-
-            <div class="flex gap-6 items-start">
-              <div
-                class="flex-shrink-0 w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-lg">
-                2
-              </div>
-              <div class="pt-2">
-                <h3 class="text-xl font-semibold mb-2">Review Candidates</h3>
-                <p class="text-muted-foreground">
-                  Recruiters from around the world submit qualified candidates.
-                  Review their profiles, resumes, and conduct interviews at your
-                  pace.
-                </p>
-              </div>
-            </div>
-
-            <div class="flex gap-6 items-start">
-              <div
-                class="flex-shrink-0 w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-lg">
-                3
-              </div>
-              <div class="pt-2">
-                <h3 class="text-xl font-semibold mb-2">Hire & Pay</h3>
-                <p class="text-muted-foreground">
-                  Make your hiring decision and pay the recruiter their reward
-                  only when you successfully hire a candidate. No upfront fees,
-                  no hidden costs.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div v-else class="space-y-6 max-w-2xl mx-auto">
-            <div class="flex gap-6 items-start">
-              <div
-                class="flex-shrink-0 w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-lg">
-                1
-              </div>
-              <div class="pt-2">
-                <h3 class="text-xl font-semibold mb-2">Browse Bounties</h3>
-                <p class="text-muted-foreground">
-                  Explore job bounties from companies worldwide. Filter by
-                  industry, location, role type, and reward amount to find the
-                  perfect opportunities.
-                </p>
+          <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            <div class="space-y-6">
+              <div class="flex items-start gap-3">
+                <div
+                  class="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                  <svg
+                    class="w-5 h-5 text-primary"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 4v16m8-8H4" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="font-semibold text-lg mb-2">Creating Bounties</h3>
+                  <ul class="space-y-2 text-sm text-muted-foreground">
+                    <li class="flex items-start gap-2">
+                      <span class="text-primary mt-1">•</span>
+                      <span>Click "Post a Bounty" from your dashboard</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                      <span class="text-primary mt-1">•</span>
+                      <span
+                        >Fill in the role details, budget, and job
+                        description</span
+                      >
+                    </li>
+                    <li class="flex items-start gap-2">
+                      <span class="text-primary mt-1">•</span>
+                      <span
+                        >Set required info for candidates (CV + custom
+                        questions)</span
+                      >
+                    </li>
+                    <li class="flex items-start gap-2">
+                      <span class="text-primary mt-1">•</span>
+                      <span>Add contact details and set a due date</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                      <span class="text-primary mt-1">•</span>
+                      <span>Wait for recruiters to apply to your bounty</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                      <span class="text-primary mt-1">•</span>
+                      <span>Approve the recruiters you want to work with</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                      <span class="text-primary mt-1">•</span>
+                      <span>Review candidate submissions and make hires</span>
+                    </li>
+                  </ul>
+                </div>
               </div>
             </div>
 
-            <div class="flex gap-6 items-start">
-              <div
-                class="flex-shrink-0 w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-lg">
-                2
-              </div>
-              <div class="pt-2">
-                <h3 class="text-xl font-semibold mb-2">Submit Candidates</h3>
-                <p class="text-muted-foreground">
-                  Source and submit qualified candidates from your network.
-                  Provide detailed information to increase your chances of a
-                  successful placement.
-                </p>
-              </div>
-            </div>
-
-            <div class="flex gap-6 items-start">
-              <div
-                class="flex-shrink-0 w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-lg">
-                3
-              </div>
-              <div class="pt-2">
-                <h3 class="text-xl font-semibold mb-2">Get Paid</h3>
-                <p class="text-muted-foreground">
-                  When the company hires your candidate, you receive your
-                  reward. Track all your submissions and earnings in your
-                  dashboard.
-                </p>
+            <div class="space-y-6">
+              <div class="flex items-start gap-3">
+                <div
+                  class="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                  <svg
+                    class="w-5 h-5 text-primary"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="font-semibold text-lg mb-2">Claiming Bounties</h3>
+                  <ul class="space-y-2 text-sm text-muted-foreground">
+                    <li class="flex items-start gap-2">
+                      <span class="text-primary mt-1">•</span>
+                      <span>Browse available bounties on the platform</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                      <span class="text-primary mt-1">•</span>
+                      <span>Apply to a bounty by expressing your interest</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                      <span class="text-primary mt-1">•</span>
+                      <span>Wait for company approval to start working</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                      <span class="text-primary mt-1">•</span>
+                      <span>Once approved, submit candidates via the form</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                      <span class="text-primary mt-1">•</span>
+                      <span
+                        >Candidate names stay hidden until legally-binding
+                        document is signed</span
+                      >
+                    </li>
+                    <li class="flex items-start gap-2">
+                      <span class="text-primary mt-1">•</span>
+                      <span>Receive payment if all requirements are met</span>
+                    </li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>
 
           <div class="flex justify-center gap-4 pt-4">
-            <Button @click="currentStep = 1" variant="outline" size="lg">
+            <Button @click="currentStep = 2" variant="outline" size="lg">
               Back
             </Button>
             <Button
@@ -392,12 +427,53 @@ import { authClient } from "@/lib/auth-client";
 const currentStep = ref(1);
 const selectedType = ref<"COMPANY" | "RECRUITER" | null>(null);
 const isLoading = ref(false);
+const uploadProgress = ref(0);
+const fileInput = ref<HTMLInputElement | null>(null);
 
 const session = authClient.useSession();
 
+const formData = ref({
+  name: "",
+  email: "",
+  phone: "",
+  bio: "",
+  companyName: "",
+  image: "",
+  linkedinUrl: "",
+  facebookUrl: "",
+  websiteUrl: "",
+});
+
+onMounted(() => {
+  if (!session.value?.data?.user) {
+    navigateTo("/sign-in");
+    return;
+  }
+
+  const user = session.value?.data?.user;
+  if (user) {
+    formData.value.name = user.name || "";
+    formData.value.email = user.email || "";
+    formData.value.image = user.image || "";
+  }
+});
+
+const getInitials = (name: string) => {
+  if (!name) return "?";
+  const parts = name.split(" ");
+  if (parts.length >= 2 && parts[0]?.[0] && parts[1]?.[0]) {
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
+  return name.substring(0, 2).toUpperCase();
+};
+
 const goToStep2 = () => {
+  currentStep.value = 2;
+};
+
+const goToStep3 = () => {
   if (selectedType.value) {
-    currentStep.value = 2;
+    currentStep.value = 3;
   }
 };
 
@@ -412,10 +488,21 @@ const completeOnboarding = async () => {
       body: {
         userId: session.value.data.user.id,
         userType: selectedType.value,
+        name: formData.value.name,
+        email: formData.value.email,
+        phone: formData.value.phone,
+        bio: formData.value.bio,
+        companyName: formData.value.companyName,
+        image: formData.value.image,
+        linkedinUrl: formData.value.linkedinUrl,
+        facebookUrl: formData.value.facebookUrl,
+        websiteUrl: formData.value.websiteUrl,
       },
     });
 
-    await navigateTo("/");
+    await authClient.getSession();
+
+    window.location.href = "/";
   } catch (error) {
     console.error("Failed to complete onboarding:", error);
   } finally {

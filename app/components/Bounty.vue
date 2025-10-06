@@ -39,8 +39,9 @@ interface BountyProps {
     payoutType: "CASH" | "PERCENTAGE";
     payoutAmount?: number | null;
     payoutPercentage?: number | null;
-    company?: {
-      companyName: string;
+    user?: {
+      companyName?: string;
+      name?: string;
     };
   };
   companyName?: string;
@@ -50,7 +51,10 @@ const props = defineProps<BountyProps>();
 
 const displayCompanyName = computed(() => {
   return (
-    props.companyName || props.bounty.company?.companyName || "Unknown Company"
+    props.companyName ||
+    props.bounty.user?.companyName ||
+    props.bounty.user?.name ||
+    "Unknown Company"
   );
 });
 </script>

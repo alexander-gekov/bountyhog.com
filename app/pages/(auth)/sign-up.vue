@@ -3,7 +3,7 @@
     <!-- Left side: Form -->
     <div
       class="flex flex-col justify-between p-6 sm:p-10 bg-background text-foreground">
-      <NuxtLink to="/" class="text-2xl font-bold"> RecruityHub </NuxtLink>
+      <NuxtLink to="/" class="font-mono flex items-center gap-2 text-2xl font-bold"><img src="/logo.png" alt="BountyHog" class="w-14 h-14"></img>BountyHog </NuxtLink>
 
       <div class="mx-auto my-auto w-full max-w-sm space-y-6">
         <div class="space-y-2 text-left">
@@ -129,9 +129,8 @@
         <Quote class="w-16 h-16 text-foreground/20" :stroke-width="1.5" />
         <p class="text-2xl font-medium text-foreground/80 leading-relaxed">
           The ability to connect companies with a global network of recruiters
-          on a success-based model is a game-changer. RecruityHub streamlines
-          the entire process from posting a bounty to hiring the perfect
-          candidate.
+          on a success-based model is a game-changer. BountyHog streamlines the
+          entire process from posting a bounty to hiring the perfect candidate.
         </p>
         <div class="flex items-center gap-4">
           <Avatar>
@@ -172,7 +171,7 @@ const error = ref("");
 const handleSignUpWithGoogle = async () => {
   await authClient.signIn.social({
     provider: "google",
-    callbackURL: "/",
+    callbackURL: window.location.origin,
   });
 };
 

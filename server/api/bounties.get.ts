@@ -1,23 +1,24 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 const PAGE_SIZE = 25;
 
 export default defineEventHandler(async (event) => {
   const query = getQuery(event);
-  const page = parseInt(query.page as string || '1', 10);
+  const page = parseInt((query.page as string) || "1", 10);
 
   try {
     const bounties = await prisma.bounty.findMany({
       where: {
-        status: 'OPEN',
+        status: "OPEN",
       },
       include: {
-        company: {
+        user: {
           select: {
             id: true,
+            name: true,
             companyName: true,
-            description: true,
+            bio: true,
           },
         },
         _count: {
@@ -28,7 +29,7 @@ export default defineEventHandler(async (event) => {
         },
       },
       orderBy: {
-        createdAt: 'desc',
+        createdAt: "desc",
       },
       skip: (page - 1) * PAGE_SIZE,
       take: PAGE_SIZE,
@@ -36,7 +37,7 @@ export default defineEventHandler(async (event) => {
 
     const totalBounties = await prisma.bounty.count({
       where: {
-        status: 'OPEN',
+        status: "OPEN",
       },
     });
 
@@ -45,10 +46,10 @@ export default defineEventHandler(async (event) => {
       hasNextPage: page * PAGE_SIZE < totalBounties,
     };
   } catch (error) {
-    console.error('Error fetching bounties:', error);
+    console.error("Error fetching bounties:", error);
     throw createError({
       statusCode: 500,
-      statusMessage: 'Failed to fetch bounties',
+      statusMessage: "Failed to fetch bounties",
     });
   }
 });

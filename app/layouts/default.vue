@@ -1,23 +1,11 @@
 <template>
   <!-- Simple fallback pattern background -->
   <div
-    class="fixed inset-0 -z-10 bg-stone-50 dark:bg-stone-950"
+    class="fixed inset-0 -z-10 bg-background"
     style="
       background-image: radial-gradient(
         circle,
-        rgba(0, 0, 0, 0.15) 1px,
-        transparent 1px
-      );
-      background-size: 20px 20px;
-    "></div>
-
-  <!-- Dark mode pattern overlay -->
-  <div
-    class="fixed inset-0 -z-10 hidden dark:block"
-    style="
-      background-image: radial-gradient(
-        circle,
-        rgba(255, 255, 255, 0.08) 1px,
+        oklch(from var(--foreground) l c h / 0.08) 1px,
         transparent 1px
       );
       background-size: 20px 20px;
@@ -30,13 +18,11 @@
     :direction="PATTERN_BACKGROUND_DIRECTION.Bottom"
     size="lg" />
   <!-- Navigation -->
-  <header class="border-b">
-    <div class="container mx-auto px-4 py-4">
+  <header>
+    <div class="container mx-auto max-w-7xl space-y-6 p-4 md:p-6 lg:px-8">
       <nav class="flex items-center justify-between">
         <div class="flex items-center space-x-8">
-          <NuxtLink to="/" class="text-xl font-bold text-foreground">
-            RecruityHub
-          </NuxtLink>
+          <NuxtLink to="/" class="font-mono flex items-center gap-2 text-2xl font-bold"><img src="/logo.png" alt="BountyHog" class="w-14 h-14"></img>BountyHog </NuxtLink>
           <div class="flex items-center space-x-6">
             <NuxtLink
               to="/bounties"
@@ -105,7 +91,7 @@
   </header>
 
   <!-- Main Content -->
-  <main>
+  <main class="container mx-auto max-w-7xl p-4">
     <slot />
   </main>
 </template>

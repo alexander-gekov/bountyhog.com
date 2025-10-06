@@ -11,9 +11,9 @@
 
   <div v-else-if="error" class="container mx-auto px-4 py-8">
     <div class="text-center py-16">
-      <h1 class="text-2xl font-bold mb-4">Company Not Found</h1>
+      <h1 class="text-2xl font-bold mb-4">User Not Found</h1>
       <p class="text-muted-foreground mb-6">
-        The company you're looking for doesn't exist.
+        The user you're looking for doesn't exist.
       </p>
       <NuxtLink to="/bounties">
         <Button>Back to Bounties</Button>
@@ -22,22 +22,22 @@
   </div>
 
   <div v-else-if="company" class="container mx-auto px-4 py-8">
-    <!-- Company Header -->
+    <!-- User Header -->
     <div class="mb-8">
       <div class="flex items-start justify-between mb-4">
         <div>
           <h1 class="text-3xl font-bold tracking-tight mb-2">
-            {{ company.companyName }}
+            {{ company.companyName || company.name }}
           </h1>
-          <p v-if="company.description" class="text-lg text-muted-foreground">
-            {{ company.description }}
+          <p v-if="company.bio" class="text-lg text-muted-foreground">
+            {{ company.bio }}
           </p>
         </div>
 
         <div class="flex items-center gap-4">
           <a
-            v-if="company.website"
-            :href="company.website"
+            v-if="company.websiteUrl"
+            :href="company.websiteUrl"
             target="_blank"
             rel="noopener noreferrer"
             class="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1">
@@ -147,7 +147,7 @@
           v-for="bounty in filteredBounties"
           :key="bounty.id"
           :bounty="bounty"
-          :company-name="company.companyName" />
+          :company-name="company.companyName || company.name" />
       </ul>
     </div>
 
@@ -197,13 +197,12 @@
 import { useCompanyQuery } from "@/composables/useCompanyQuery";
 
 const route = useRoute();
-const companyId = route.params.id as string;
+const userId = route.params.id as string;
 
-// Reactive filters
 const statusFilter = ref("all");
 const sortBy = ref("newest");
 
-const { data: company, isPending: pending, error } = useCompanyQuery(companyId);
+const { data: company, isPending: pending, error } = useCompanyQuery(userId);
 
 // Computed properties
 const openBounties = computed(

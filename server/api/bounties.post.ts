@@ -110,35 +110,11 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    // Get or create company
-    let company = await prisma.company.findUnique({
-      where: { userId: session.user.id },
-    });
-
-    if (!company) {
-      if (!body.company?.companyName) {
-        throw createError({
-          statusCode: 400,
-          statusMessage: "Company information is required for first bounty",
-        });
-      }
-
-      company = await prisma.company.create({
-        data: {
-          userId: session.user.id,
-          companyName: body.company.companyName,
-          description: body.company.description || null,
-          website: body.company.website || null,
-        },
-      });
-    }
-
-    // Create bounty
     const bounty = await prisma.bounty.create({
       data: {
         title: body.title,
         description: body.description,
-        companyId: company.id,
+        userId: session.user.id,
         payoutType: body.payoutType,
         payoutAmount: body.payoutAmount || null,
         payoutPercentage: body.payoutPercentage || null,
@@ -151,9 +127,10 @@ export default defineEventHandler(async (event) => {
         status: "OPEN",
       },
       include: {
-        company: {
+        user: {
           select: {
             id: true,
+            name: true,
             companyName: true,
           },
         },

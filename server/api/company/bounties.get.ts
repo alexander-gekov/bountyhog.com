@@ -1,50 +1,40 @@
-import { PrismaClient } from '@prisma/client'
-import { auth } from '@/lib/auth'
+import { PrismaClient } from "@prisma/client";
+import { auth } from "@/lib/auth";
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
 export default defineEventHandler(async (event) => {
   // Check authentication
-  const session = await auth.api.getSession({ headers: event.node.req.headers })
+  const session = await auth.api.getSession({
+    headers: event.node.req.headers,
+  });
   if (!session?.user) {
     throw createError({
       statusCode: 401,
-      statusMessage: 'Authentication required'
-    })
+      statusMessage: "Authentication required",
+    });
   }
 
   // Check if user is a company
-  if (session.user.userType !== 'COMPANY') {
+  if (session.user.userType !== "COMPANY") {
     throw createError({
       statusCode: 403,
-      statusMessage: 'Only companies can access this endpoint'
-    })
+      statusMessage: "Only companies can access this endpoint",
+    });
   }
 
   try {
-    // Get or create company profile
-    let company = await prisma.company.findUnique({
-      where: { userId: session.user.id }
-    })
-
-    if (!company) {
-      throw createError({
-        statusCode: 404,
-        statusMessage: 'Company profile not found'
-      })
-    }
-
-    // Fetch company bounties with all related data
     const bounties = await prisma.bounty.findMany({
       where: {
-        companyId: company.id
+        userId: session.user.id,
       },
       include: {
-        company: {
+        user: {
           select: {
             id: true,
-            companyName: true
-          }
+            name: true,
+            companyName: true,
+          },
         },
         collaborations: {
           include: {
@@ -54,12 +44,12 @@ export default defineEventHandler(async (event) => {
                   select: {
                     id: true,
                     name: true,
-                    email: true
-                  }
-                }
-              }
-            }
-          }
+                    email: true,
+                  },
+                },
+              },
+            },
+          },
         },
         submissions: {
           include: {
@@ -69,34 +59,34 @@ export default defineEventHandler(async (event) => {
                   select: {
                     id: true,
                     name: true,
-                    email: true
-                  }
-                }
-              }
-            }
+                    email: true,
+                  },
+                },
+              },
+            },
           },
           orderBy: {
-            createdAt: 'desc'
-          }
+            createdAt: "desc",
+          },
         },
         _count: {
           select: {
             collaborations: true,
-            submissions: true
-          }
-        }
+            submissions: true,
+          },
+        },
       },
       orderBy: {
-        createdAt: 'desc'
-      }
-    })
+        createdAt: "desc",
+      },
+    });
 
-    return bounties
+    return bounties;
   } catch (error) {
-    console.error('Error fetching company bounties:', error)
+    console.error("Error fetching company bounties:", error);
     throw createError({
       statusCode: 500,
-      statusMessage: 'Failed to fetch bounties'
-    })
+      statusMessage: "Failed to fetch bounties",
+    });
   }
-})
+});

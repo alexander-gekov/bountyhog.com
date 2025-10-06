@@ -44,19 +44,6 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    // Get company profile
-    let company = await prisma.company.findUnique({
-      where: { userId: session.user.id },
-    });
-
-    if (!company) {
-      throw createError({
-        statusCode: 404,
-        statusMessage: "Company profile not found",
-      });
-    }
-
-    // Verify the submission belongs to a bounty owned by this company
     const submission = await prisma.submission.findUnique({
       where: { id: submissionId },
       include: {
@@ -76,7 +63,7 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    if (submission.bounty.companyId !== company.id) {
+    if (submission.bounty.userId !== session.user.id) {
       throw createError({
         statusCode: 403,
         statusMessage: "You can only review submissions for your own bounties",
