@@ -171,7 +171,7 @@ const error = ref("");
 const handleSignUpWithGoogle = async () => {
   await authClient.signIn.social({
     provider: "google",
-    callbackURL: window.location.origin,
+    callbackURL: '/',
   });
 };
 
@@ -186,7 +186,7 @@ const handleSignUp = async () => {
       name: formData.value.name,
       email: formData.value.email,
       password: formData.value.password,
-      callbackURL: window.location.origin,
+      callbackURL: '/'  ,
     });
 
     if (authError) {
