@@ -51,11 +51,21 @@ export default defineEventHandler(async (event) => {
         tallyFormId: formId,
       },
     });
+
+    if (!bounty) {
+      console.log("Bounty not found");
+      return { success: true, message: "Bounty not found" };
+    }
+
     const user = await prisma.user.findUnique({
       where: {
         id: bounty?.userId,
       },
     });
+    if (!user) {
+      console.log("User not found");
+      return { success: true, message: "User not found" };
+    }
 
     try {
       const data = await resend.emails.send({
@@ -66,6 +76,7 @@ export default defineEventHandler(async (event) => {
          You have a new submission for ${payload.data.formName}. View it here: https://bountyhog.com/
         `,
       });
+      console.log("Email sent to user", user?.email);
 
       return data;
     } catch (error) {
