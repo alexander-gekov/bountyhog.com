@@ -1,3 +1,4 @@
+import { prisma } from "@/lib/prisma";
 import resend from "@/lib/resend";
 
 interface TallyWebhookData {
@@ -45,10 +46,21 @@ export default defineEventHandler(async (event) => {
       return { success: true, message: "Event type not handled" };
     }
 
+    const bounty = await prisma.bounty.findFirst({
+      where: {
+        tallyFormId: formId,
+      },
+    });
+    const user = await prisma.user.findUnique({
+      where: {
+        id: bounty?.userId,
+      },
+    });
+
     try {
       const data = await resend.emails.send({
         from: "BountyHog",
-        to: ["test@bountyhog.com"],
+        to: [user?.email || ""],
         subject: "New submission for " + payload.data.formName,
         html: `
          You have a new submission for ${payload.data.formName}. View it here: https://bountyhog.com/
